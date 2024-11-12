@@ -11,6 +11,9 @@ import os
 # os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 # import tensorflow 
 
+LANDMARK_NAMES = ['left elbow', 'right hip'] # placeholder values
+THRESHOLD = 0.3 # placeholder
+
 class NaoDanceTutor:
     """ Main Nao class, from here all other classes are instantiated. """
     
@@ -42,8 +45,28 @@ class NaoDanceTutor:
         return True
     
     def teach_move(self):
-        """ IMPLEMENT """
+        self.say("Alright! Let me teach you how to do air guitar! Watch how I do it.")
         self.test_dance()
+        self.say("Now you try to do it!")
+        
+        successful_attempts = 0
+        while successful_attempts < 3:
+            self.say("One, two, three!")
+            # TODO: call another function to record a vid
+            # TODO: call another function to compare movement to reference and send back the errors for each landmark
+            landmark_errors = [0.1, 0.3] # placeholder values
+            if mean(landmark_errors) < THRESHOLD:
+                successful_attempts += 1
+                self.say("Amazing! Let's try it again together!")
+            else:
+                successful_attempts = 0
+                worst_error = np.argmax(landmark_errors)
+                self.say(f"Nice try! But I think you can do it better. I'll show you again. Pay attention to my {LANDMARK_NAMES[worst_error]}")
+                self.test_dance()
+                self.say("And now you again.")
+
+        self.say("Good job! You've learned how to do air guitar!")
+       
     
     def dance_together(self):
         """ IMPLEMENT """
