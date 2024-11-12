@@ -32,10 +32,10 @@ class NaoDanceTutor:
         
     def test_dance(self):
         dance = self.dances.air_guitar(multiplier=0.5)
-        self.s.ALMotion.angleInterpolationBezier(dance[0], dance[1], dance[2])
+        self.s.ALMotion.angleInterpolationBezier(*dance)
 
         dance = self.dances.dance_move()
-        self.s.ALMotion.angleInterpolationBezier(dance[0], dance[1], dance[2])
+        self.s.ALMotion.angleInterpolationBezier(*dance)
 
     def motion_detected(self):
         """ IMPLEMENT """
