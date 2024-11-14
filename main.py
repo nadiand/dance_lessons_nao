@@ -34,11 +34,13 @@ class NaoDanceTutor:
             print(f"Error in say_message: {e}")
         
     def test_dance(self):
-        dance = self.dances.air_guitar(multiplier=0.5)
+        dance = self.dances.dab(multiplier=0.5)
         self.s.ALMotion.angleInterpolationBezier(*dance)
+        # dance = self.dances.air_guitar(multiplier=0.5)
+        # self.s.ALMotion.angleInterpolationBezier(*dance)
 
-        dance = self.dances.dance_move()
-        self.s.ALMotion.angleInterpolationBezier(*dance)
+        # dance = self.dances.dance_move()
+        # self.s.ALMotion.angleInterpolationBezier(*dance)
 
     def motion_detected(self):
         """ IMPLEMENT """
