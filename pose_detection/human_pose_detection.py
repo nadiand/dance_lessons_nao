@@ -1,15 +1,45 @@
 import cv2
 import mediapipe as mp
 import numpy as np
+import time
+
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
 class PoseDetector:
+    ATTRIBUTES = ['left forearm', 'left arm', 'right arm', 'left elbow', 'right elbow', 'right forearm']
    
-    def __init__(self, ref_file, verbose):
+    def __init__(self, ref_file, nr_pics, verbose):
         self.ref_landmarks = self.get_landmark_coords(ref_file)
         self.verbose = verbose
+        self.nr_pictures = nr_pics
+
+        # Open a connection to the webcam (default camera is device 0)
+        self.cap = cv2.VideoCapture(0)
+        if not self.cap.isOpened():
+            print("Error: Could not access the webcam.")
+        if self.verbose:
+            print("Camera opened")
+
+    def take_pics(self, sleep_time = 0.5):
+        if self.verbose:
+            print("Start taking pictures")
+        while True:
+            # Read the video frame-by-frame
+            ret, frame = self.cap.read()
+            if not ret:
+                print("Error: Unable to capture video.")
+                break
+            for i in range(0, self.nr_pictures):
+                cv2.imwrite('captured_image' + str(i) + '.jpg', frame)
+                time.sleep(sleep_time)
+            if self.verbose:
+                print("Stop taking pictures")
+            break
+
+        # maybe we dont want to release the camera cuz we'll be calling this function often. maybe we should find the function
+        # to "capture" the camera again and put it intthe beginning of this funciton TODO
 
 
     def get_landmark_coords(self, file):
@@ -266,21 +296,42 @@ class PoseDetector:
         if self.verbose:
             print(diff_left_elbow_wrist, diff_right_elbow_wrist, diff_left_shoulder_elbow, diff_right_shoulder_elbow, diff_elbow_left, diff_elbow_right)
 
-        return np.mean([diff_left_elbow_wrist, diff_left_shoulder_elbow, diff_right_shoulder_elbow, diff_elbow_left, diff_elbow_right, diff_right_elbow_wrist])
+        return [diff_left_elbow_wrist, diff_left_shoulder_elbow, diff_right_shoulder_elbow, diff_elbow_left, diff_elbow_right, diff_right_elbow_wrist]
 
     def get_best_error(self, pose):
-        non_mirrored = self.get_pos_errors(self.ref_landmarks, pose, "original")
-        mirrored = self.get_pos_errors(self.ref_landmarks, pose, "mirrored")
+        non_mirrored = np.mean(self.get_pos_errors(self.ref_landmarks, pose, "original"))
+        mirrored = np.mean(self.get_pos_errors(self.ref_landmarks, pose, "mirrored"))
         if self.verbose:
             print(non_mirrored)
             print(mirrored)
 
         return min(mirrored, non_mirrored)
+    
+    def best_fitting_image_error(self):
+        best_err, best_pic = np.inf, 0
+        for i in range(0, self.nr_pictures):
+            pos_dict = self.get_landmark_coords('captured_image' + str(i) + '.jpg')
+            err = self.get_best_error(pos_dict)
+            if best_err > err:
+                best_err = err
+                best_pic = i
+
+        return best_err, best_pic
+    
+    def biggest_mistake(self, pic_id):
+        pos_dict = self.get_landmark_coords('captured_image' + str(pic_id) + '.jpg')
+        errors = self.get_pos_errors(pos_dict, "original")
+        worst_error = np.argmax(errors)
+        return self.ATTRIBUTES[worst_error]
 
 
-pd = PoseDetector(ref_file='./pictures/not_shit.jpg', verbose=True)
+# to test this:
+pd = PoseDetector(ref_file='./pictures/not_shit.jpg', nr_pics=3, verbose=True)
 dab = pd.get_landmark_coords('./pictures/shit.jpg')
 print(pd.get_best_error(dab))
+
+
+
 # reference = cords('./pictures/reference.jpg')
 # dab = cords('./pictures/dab.jpg')
 # reference = cords('./pictures/good.jpg')
