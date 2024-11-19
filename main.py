@@ -5,11 +5,11 @@ import dance.dances as dances
 import speech.speechrec as speechrec
 import time as t
 from transformers import pipeline
-import librosa
-import threading
 import os
+import numpy as np
+from pygame import mixer
+
 # os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
-# import tensorflow 
 
 LANDMARK_NAMES = ['left elbow', 'right hip'] # placeholder values
 THRESHOLD = 0.3 # placeholder
@@ -34,13 +34,13 @@ class NaoDanceTutor:
             print(f"Error in say_message: {e}")
         
     def test_dance(self):
-        dance = self.dances.dab(multiplier=0.5)
+        dance = self.dances.dab(multiplier=2)
         self.s.ALMotion.angleInterpolationBezier(*dance)
-        # dance = self.dances.air_guitar(multiplier=0.5)
-        # self.s.ALMotion.angleInterpolationBezier(*dance)
+        dance = self.dances.air_guitar(multiplier=2)
+        self.s.ALMotion.angleInterpolationBezier(*dance)
 
-        # dance = self.dances.dance_move()
-        # self.s.ALMotion.angleInterpolationBezier(*dance)
+        dance = self.dances.dance_move()
+        self.s.ALMotion.angleInterpolationBezier(*dance)
 
     def motion_detected(self):
         """ IMPLEMENT """
@@ -57,7 +57,7 @@ class NaoDanceTutor:
             # TODO: call another function to record a vid
             # TODO: call another function to compare movement to reference and send back the errors for each landmark
             landmark_errors = [0.1, 0.3] # placeholder values
-            if mean(landmark_errors) < THRESHOLD:
+            if np.mean(landmark_errors) < THRESHOLD:
                 successful_attempts += 1
                 self.say("Amazing! Let's try it again together!")
             else:
@@ -68,27 +68,34 @@ class NaoDanceTutor:
                 self.say("And now you again.")
 
         self.say("Good job! You've learned how to do air guitar!")
-       
+
+    def play_music(self, file):
+        # Initialize the mixer
+        mixer.init()
+
+        # Load and play the audio file
+        mixer.music.load(os.path.join(os.getcwd(), file).replace("\\", "/"))
+        mixer.music.play()  
     
     def dance_together(self):
-        """ IMPLEMENT """
-        # Somehow need to get both commands simulatenous, using the .post function, how?
-        self.s.ALAudioPlayer.playFile(os.path.join(os.getcwd(), "NaoBeat.wav").replace("\\", "/"))
+        # play music and dance
+        self.play_music("sound/Funkytown.wav")
         self.test_dance()
-
     
     def introduction(self):
         if self.motion_detected():
-            self.say("Hi there!")
+            self.say("Hi there! What's your name?")
         t.sleep(2)                  # give time for response
-        #name = nao.whispermini(3.0)['text']
+        
+        name = self.speechrec.whispermini(3.0)['text']
+        print(name)
 
         self.say("My name is Nao, I am here to teach you some cool moves, but most importantly: to have fun together!")
         self.say("First off, you can choose whether you want to learn a dancemove, or to just dance together. What would you prefer?")
-        
     
     def scenario(self):
         #input = self.speechrec.whispermini(3.0)['text']
+        #print(input)
         input = "I want to dance"
         if "learn" in input:
             self.teach_move()
@@ -98,8 +105,6 @@ class NaoDanceTutor:
     def main(self):
         self.introduction()
         self.scenario()
-
-        
 
     
 if __name__ == "__main__":
