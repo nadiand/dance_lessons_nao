@@ -40,15 +40,15 @@ def cords(file):
         bg_image[:] = BG_COLOR
         annotated_image = np.where(condition, annotated_image, bg_image)
         # # Draw pose landmarks on the image.
-        # mp_drawing.draw_landmarks(
-        #     annotated_image,
-        #     results.pose_landmarks,
-        #     mp_pose.POSE_CONNECTIONS,
-        #     landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
-        # cv2.imwrite('/tmp/annotated_image' + '.png', annotated_image)
-        # # Plot pose world landmarks.
-        # mp_drawing.plot_landmarks(
-        #     results.pose_world_landmarks, mp_pose.POSE_CONNECTIONS)
+        mp_drawing.draw_landmarks(
+            annotated_image,
+            results.pose_landmarks,
+            mp_pose.POSE_CONNECTIONS,
+            landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+        cv2.imwrite('/tmp/annotated_image' + '.png', annotated_image)
+        # Plot pose world landmarks.
+        mp_drawing.plot_landmarks(
+            results.pose_world_landmarks, mp_pose.POSE_CONNECTIONS)
     
     combined_pos = {
       "original": {
@@ -164,6 +164,9 @@ def get_angle(point1, point2):
     
     # Convert the angle to degrees
     angle_deg = np.degrees(angle_rad)
+
+    # if angle_deg < 0:
+    #    angle_deg += 360
     
     return angle_deg
 
@@ -215,12 +218,13 @@ def get_angle_between_lines(point1, point2, shared_point):
 
 
 
-shit = cords('./pictures/shit.jpg')
-not_shit = cords('./pictures/not_shit.jpg')
-reference = cords('./pictures/reference.jpg')
-dab = cords('./pictures/dab.jpg')
-bad = cords('./pictures/bad.jpg')
-passed = cords('./pictures/pass.jpg')
+dab = cords('./pictures/shit.jpg')
+reference = cords('./pictures/not_shit.jpg')
+# reference = cords('./pictures/reference.jpg')
+# dab = cords('./pictures/dab.jpg')
+# reference = cords('./pictures/good.jpg')
+# bad = cords('./pictures/bad.jpg')
+# passed = cords('./pictures/pass.jpg')
 
 # print("shit")
 # mean_difference(reference, shit, verbose=True)
@@ -235,13 +239,64 @@ passed = cords('./pictures/pass.jpg')
 # print("reference")
 # mean_difference(reference, reference, verbose=True)
 
-print(get_angle(reference["original"]["LEFT_WRIST"],reference["original"]["LEFT_ELBOW"]))
-print(get_angle(reference["original"]["LEFT_ELBOW"],reference["original"]["LEFT_SHOULDER"]))
-print(get_angle(reference["original"]["RIGHT_ELBOW"],reference["original"]["RIGHT_SHOULDER"]))
-print(get_angle(shit["original"]["LEFT_ELBOW"],shit["original"]["LEFT_WRIST"]))
-print(get_angle(shit["original"]["RIGHT_ELBOW"],shit["original"]["RIGHT_WRIST"]))
-print("angle elbow: ", get_angle_between_lines(reference["original"]["LEFT_WRIST"],reference["original"]["LEFT_SHOULDER"],reference["original"]["LEFT_ELBOW"]))
-print("angle elbow: ", get_angle_between_lines(shit["original"]["RIGHT_WRIST"],shit["original"]["RIGHT_SHOULDER"],shit["original"]["RIGHT_ELBOW"]))
+def get_pos_errors(ref, pose, mirror_key):
+    # Compute angles for ref
+    angle_ref_left_elbow_wrist = get_angle(ref["original"]["LEFT_ELBOW"], reference["original"]["LEFT_WRIST"])
+    angle_ref_left_shoulder_elbow = get_angle(ref["original"]["LEFT_SHOULDER"], ref["original"]["LEFT_ELBOW"])
+    # sin_ref, cos_ref = np.sin(angle_ref_left_shoulder_elbow), np.cos(angle_ref_left_shoulder_elbow)
+    # mean_trig_ref = (sin_ref+cos_ref)/2
+    angle_ref_right_elbow_wrist = get_angle(ref["original"]["RIGHT_ELBOW"], ref["original"]["RIGHT_WRIST"])
+    angle_ref_right_shoulder_elbow = get_angle(ref["original"]["RIGHT_SHOULDER"], ref["original"]["RIGHT_ELBOW"])
+
+    # Compute angles for pose2
+    angle_pose_left_elbow_wrist = get_angle(pose[mirror_key]["LEFT_ELBOW"], pose[mirror_key]["LEFT_WRIST"])
+    angle_pose_left_shoulder_elbow = get_angle(pose[mirror_key]["LEFT_SHOULDER"], pose[mirror_key]["LEFT_ELBOW"])
+    # sin_pose, cos_pose = np.sin(angle_pose_left_shoulder_elbow), np.cos(angle_pose_left_shoulder_elbow)
+    # mean_trig_pose = (sin_pose+cos_pose)/2
+    angle_pose_right_elbow_wrist = get_angle(pose[mirror_key]["RIGHT_ELBOW"], pose[mirror_key]["RIGHT_WRIST"])
+    angle_pose_right_shoulder_elbow = get_angle(pose[mirror_key]["RIGHT_SHOULDER"], pose[mirror_key]["RIGHT_ELBOW"])
+
+    # Compute elbow angles using `get_angle_between_lines`
+    elbow_angle_ref_left = get_angle_between_lines(
+        ref["original"]["LEFT_WRIST"],
+        ref["original"]["LEFT_SHOULDER"],
+        ref["original"]["LEFT_ELBOW"]
+    )
+    elbow_angle_ref_right = get_angle_between_lines(
+        ref["original"]["RIGHT_WRIST"],
+        ref["original"]["RIGHT_SHOULDER"],
+        ref["original"]["RIGHT_ELBOW"]
+    )
+    elbow_angle_pose_left = get_angle_between_lines(
+        pose[mirror_key]["LEFT_WRIST"],
+        pose[mirror_key]["LEFT_SHOULDER"],
+        pose[mirror_key]["LEFT_ELBOW"]
+    )
+    elbow_angle_pose_right = get_angle_between_lines(
+        pose[mirror_key]["RIGHT_WRIST"],
+        pose[mirror_key]["RIGHT_SHOULDER"],
+        pose[mirror_key]["RIGHT_ELBOW"]
+    )
+
+    # Compute and print mean differences
+    diff_left_elbow_wrist = abs(angle_ref_left_elbow_wrist - angle_pose_left_elbow_wrist)
+    diff_left_shoulder_elbow = abs(angle_ref_left_shoulder_elbow - angle_pose_left_shoulder_elbow) #abs(mean_trig_ref - mean_trig_pose)
+    diff_right_elbow_wrist = abs(angle_ref_right_elbow_wrist - angle_pose_right_elbow_wrist)
+    diff_right_shoulder_elbow = abs(angle_ref_right_shoulder_elbow - angle_pose_right_shoulder_elbow)
+    diff_elbow_left = abs(elbow_angle_ref_left - elbow_angle_pose_left)
+    diff_elbow_right = abs(elbow_angle_ref_right - elbow_angle_pose_right)
+
+    print(diff_left_elbow_wrist, diff_right_elbow_wrist, diff_left_shoulder_elbow, diff_right_shoulder_elbow, diff_elbow_left, diff_elbow_right)
+
+    return np.mean([diff_left_elbow_wrist, diff_left_shoulder_elbow, diff_right_shoulder_elbow, diff_elbow_left, diff_elbow_right, diff_right_elbow_wrist])
+
+def get_best_error(ref, pose):
+    non_mirrored = get_pos_errors(ref, pose, "original")
+    mirrored = get_pos_errors(ref, pose, "mirrored")
+    print(non_mirrored)
+    print(mirrored)
+
+get_best_error(dab, reference)
 
 
 # print(reference-dab)
