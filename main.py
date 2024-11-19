@@ -1,8 +1,8 @@
 import stk.python27bridge
 import stk.events
 import stk.services
-import dances
-import speechrec
+import dance.dances
+import speech.speechrec
 import time as t
 from transformers import pipeline
 import librosa
