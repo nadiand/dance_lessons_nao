@@ -3,6 +3,7 @@ import stk.events
 import stk.services
 import dance.dances as dances
 import speech.speechrec as speechrec
+import pose_detection.human_pose_detection as posedet
 import time as t
 from transformers import pipeline
 import os
@@ -11,11 +12,9 @@ from pygame import mixer
 
 # os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
-LANDMARK_NAMES = ['left elbow', 'right hip'] # placeholder values
-THRESHOLD = 0.3 # placeholder
-
 class NaoDanceTutor:
     """ Main Nao class, from here all other classes are instantiated. """
+    THRESHOLD = 0.3 # placeholder
     
     def __init__(self):
         # Bridge
@@ -26,6 +25,7 @@ class NaoDanceTutor:
         # Initialize class instances
         self.dances = dances.Dances()
         self.speechrec = speechrec.SpeechRecognition(self.s)
+        self.pose_detector = posedet.PoseDetector(ref_file='./pictures/not_shit.jpg', nr_pics=3)
 
     def say(self, message):
         try:
@@ -54,16 +54,19 @@ class NaoDanceTutor:
         successful_attempts = 0
         while successful_attempts < 3:
             self.say("One, two, three!")
-            # TODO: call another function to record a vid
-            # TODO: call another function to compare movement to reference and send back the errors for each landmark
-            landmark_errors = [0.1, 0.3] # placeholder values
-            if np.mean(landmark_errors) < THRESHOLD:
+
+            # Captures images and stores them
+            self.pose_detector.take_pics()
+            # Evaluates the captured images and returns the best error and image id
+            smallest_error, best_image = self.pose_detector.best_fitting_image_error()
+
+            if smallest_error < self.THRESHOLD:
                 successful_attempts += 1
                 self.say("Amazing! Let's try it again together!")
             else:
                 successful_attempts = 0
-                worst_error = np.argmax(landmark_errors)
-                self.say(f"Nice try! But I think you can do it better. I'll show you again. Pay attention to my {LANDMARK_NAMES[worst_error]}")
+                worst_error_bodypart = self.pose_detector.biggest_mistake(best_image)
+                self.say(f"Nice try! But I think you can do it better. I'll show you again. Pay attention to my {worst_error_bodypart}")
                 self.test_dance()
                 self.say("And now you again.")
 
