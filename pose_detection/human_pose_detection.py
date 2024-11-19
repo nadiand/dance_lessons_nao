@@ -323,12 +323,55 @@ class PoseDetector:
         errors = self.get_pos_errors(pos_dict, "original")
         worst_error = np.argmax(errors)
         return self.ATTRIBUTES[worst_error]
+    
+    def detect_motion(self, threshold=25):
+        # read first two frames
+        ret1, frame1 = self.cap.read()
+        ret2, frame2 = self.cap.read()
+
+        while True:
+            if not ret1 and ret2:
+                print("Failed to grab frames.")
+                break
+
+            # Display the current frame
+            cv2.imshow("Camera Feed", frame1)
+
+            # Compute the absolute difference between two frames
+            diff = cv2.absdiff(frame1, frame2)
+            
+            # Convert the difference to grayscale
+            gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+            
+            # Apply Gaussian blur to reduce noise
+            blur = cv2.GaussianBlur(gray, (5, 5), 0)
+            
+            # Threshold the image to identify significant changes
+            _, thresh = cv2.threshold(blur, threshold, 255, cv2.THRESH_BINARY)
+            
+            # Dilate the thresholded image to fill in small gaps
+            dilated = cv2.dilate(thresh, None, iterations=2)
+            
+            # Find contours (outlines of motion)
+            contours, _ = cv2.findContours(dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+            
+            # Check if any contour area is large enough to signify motion
+            for contour in contours:
+                if cv2.contourArea(contour) > 500:  # Adjust size as needed
+                    return True
+
+            # Update frames
+            frame1 = frame2
+            ret2, frame2 = self.cap.read()
+                
+        return False
+
 
 
 # to test this:
-pd = PoseDetector(ref_file='./pictures/not_shit.jpg', nr_pics=3, verbose=True)
-dab = pd.get_landmark_coords('./pictures/shit.jpg')
-print(pd.get_best_error(dab))
+# pd = PoseDetector(ref_file='./pictures/not_shit.jpg', nr_pics=3, verbose=True)
+# dab = pd.get_landmark_coords('./pictures/shit.jpg')
+# print(pd.get_best_error(dab))
 
 
 
