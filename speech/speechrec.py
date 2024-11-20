@@ -49,9 +49,11 @@ class SpeechRecognition:
     def whispermini(self, time):
         with sr.Microphone() as source:
             self.r.adjust_for_ambient_noise(source)
-            self.s.ALAudioPlayer.playSine(1000, 10, 1.0, 0.5)
+            #self.s.ALAudioPlayer.playSine(1000, 10, 1.0, 0.5)
+            print('Listening for audio...')
             audio = self.r.listen(source, phrase_time_limit=time)
-            self.s.ALAudioPlayer.playSine(2000, 10, 1.0, 0.5)
+            #self.s.ALAudioPlayer.playSine(2000, 10, 1.0, 0.5)
+            print('Audio succesfully captured! Now saving and processing audio...')
 
             with open("microphone-results.wav", "wb") as f:
                 f.write(audio.get_wav_data())
@@ -60,4 +62,4 @@ class SpeechRecognition:
             wav = librosa.resample(wav, orig_sr=rate, target_sr=16000)
 
             words = self.pipe(wav, batch_size=32)
-            return words
+            return words['text']

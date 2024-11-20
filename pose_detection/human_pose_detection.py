@@ -73,7 +73,7 @@ class PoseDetector:
             bg_image[:] = BG_COLOR
             annotated_image = np.where(condition, annotated_image, bg_image)
             # Draw pose landmarks on the image.
-            self.draw_image_landmarks(annotated_image, results)
+            #self.draw_image_landmarks(annotated_image, results)
             
         
         combined_pos = {

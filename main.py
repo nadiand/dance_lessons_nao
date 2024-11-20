@@ -25,7 +25,7 @@ class NaoDanceTutor:
         # Initialize class instances
         self.dances = dances.Dances()
         self.speechrec = speechrec.SpeechRecognition(self.s)
-        self.pose_detector = posedet.PoseDetector(ref_file='./pictures/not_shit.jpg', nr_pics=3, verbose=True) # verbose=True????
+        self.pose_detector = posedet.PoseDetector(ref_file='C:/Users/luukn/OneDrive/Afbeeldingen/not_shit.jpg', nr_pics=3, verbose=True) # verbose=True????
 
     def say(self, message):
         try:
@@ -34,17 +34,18 @@ class NaoDanceTutor:
             print(f"Error in say_message: {e}")
         
     def test_dance(self):
-        dance = self.dances.dab(multiplier=2)
-        self.s.ALMotion.angleInterpolationBezier(*dance)
-        dance = self.dances.air_guitar(multiplier=2)
+        dab = self.dances.dab(multiplier=3)
+        self.s.ALMotion.angleInterpolationBezier(*dab)
+        air_guitar = self.dances.air_guitar(multiplier=2)
+        self.s.ALMotion.angleInterpolationBezier(*air_guitar)
+        dance = self.dances.dance_move(multiplier=3)
         self.s.ALMotion.angleInterpolationBezier(*dance)
 
-        # dance = self.dances.dance_move()
-        # self.s.ALMotion.angleInterpolationBezier(*dance)
     
     def teach_move(self):
         self.say("Alright! Let me teach you how to do air guitar! Watch how I do it.")
-        self.test_dance()
+        air_guitar = self.dances.air_guitar(multiplier=2)
+        self.s.ALMotion.angleInterpolationBezier(*air_guitar)
         self.say("Now you try to do it!")
         
         successful_attempts = 0
@@ -74,30 +75,33 @@ class NaoDanceTutor:
 
         # Load and play the audio file
         mixer.music.load(os.path.join(os.getcwd(), file).replace("\\", "/"))
-        mixer.music.play()  
+        mixer.music.play()  # start=64 for funkytown.mp3
     
     def dance_together(self):
+        self.say("Alrighty! Are you ready?")
+        t.sleep(2)
+        self.say("Here we go!")
         # play music and dance
-        self.play_music("sound/Funkytown.wav")
+        self.play_music("sound/Funkytown_cut.wav")
         self.test_dance()
+
+        #stop music when dancing done
+        #mixer.music.stop()
     
     def introduction(self):
         if self.pose_detector.detect_motion():
             self.say("Hi there! What's your name?")
-            t.sleep(2)                  # give time for response
             
-            # name = self.speechrec.whispermini(3.0)['text']
-            # print(name)
+            name = self.speechrec.whispermini(3.0)
 
-            self.say(f"My name is Nao, I am here to teach you some cool moves, but most importantly: to have fun together!")
+            self.say(f"Hi {name}! My name is Nao, I am here to teach you some cool moves, but most importantly: to have fun together!")
             self.say("First off, you can choose whether you want to learn a dancemove, or to just dance together. What would you prefer?")
             t.sleep(8) # prevent from running next code before Nao is finished talking
     
     def scenario(self):
-        #input = self.speechrec.whispermini(3.0)['text']
-        #print(input)
-        input = "I want to dance"
-        if "learn" in input:
+        input = self.speechrec.whispermini(3.0)
+        print('input: ', input)
+        if 'learn' in input or 'teach' in input:
             self.teach_move()
         else:
             self.dance_together()
