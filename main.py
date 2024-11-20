@@ -25,7 +25,7 @@ class NaoDanceTutor:
         # Initialize class instances
         self.dances = dances.Dances()
         self.speechrec = speechrec.SpeechRecognition(self.s)
-        self.pose_detector = posedet.PoseDetector(ref_file='./pictures/not_shit.jpg', nr_pics=3)
+        self.pose_detector = posedet.PoseDetector(ref_file='./pictures/not_shit.jpg', nr_pics=3, verbose=True) # verbose=True????
 
     def say(self, message):
         try:
@@ -39,8 +39,8 @@ class NaoDanceTutor:
         dance = self.dances.air_guitar(multiplier=2)
         self.s.ALMotion.angleInterpolationBezier(*dance)
 
-        dance = self.dances.dance_move()
-        self.s.ALMotion.angleInterpolationBezier(*dance)
+        # dance = self.dances.dance_move()
+        # self.s.ALMotion.angleInterpolationBezier(*dance)
     
     def teach_move(self):
         self.say("Alright! Let me teach you how to do air guitar! Watch how I do it.")
@@ -84,14 +84,14 @@ class NaoDanceTutor:
     def introduction(self):
         if self.pose_detector.detect_motion():
             self.say("Hi there! What's your name?")
-        t.sleep(2)                  # give time for response
-        
-        print('HEELELELELLELLE')
-        #name = self.speechrec.whispermini(3.0)['text']
-        #print(name)
+            t.sleep(2)                  # give time for response
+            
+            # name = self.speechrec.whispermini(3.0)['text']
+            # print(name)
 
-        self.say("My name is Nao, I am here to teach you some cool moves, but most importantly: to have fun together!")
-        self.say("First off, you can choose whether you want to learn a dancemove, or to just dance together. What would you prefer?")
+            self.say(f"My name is Nao, I am here to teach you some cool moves, but most importantly: to have fun together!")
+            self.say("First off, you can choose whether you want to learn a dancemove, or to just dance together. What would you prefer?")
+            t.sleep(8) # prevent from running next code before Nao is finished talking
     
     def scenario(self):
         #input = self.speechrec.whispermini(3.0)['text']
