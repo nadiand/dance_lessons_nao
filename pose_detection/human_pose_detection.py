@@ -2,9 +2,10 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import time
+CAMERA = 1
 
-mp_drawing = mp.solutions.drawing_utils
-mp_drawing_styles = mp.solutions.drawing_styles
+# mp_drawing = mp.solutions.drawing_utils
+# mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
 class PoseDetector:
@@ -16,7 +17,7 @@ class PoseDetector:
         self.nr_pictures = nr_pics
 
         # Open a connection to the webcam (default camera is device 0)
-        self.cap = cv2.VideoCapture(0)
+        self.cap = cv2.VideoCapture(CAMERA)
         if not self.cap.isOpened():
             print("Error: Could not access the webcam.")
         if self.verbose:
@@ -136,16 +137,16 @@ class PoseDetector:
 
         return combined_pos
 
-    def draw_image_landmarks(self, annotated_image, results):
-        mp_drawing.draw_landmarks(
-                annotated_image,
-                results.pose_landmarks,
-                mp_pose.POSE_CONNECTIONS,
-                landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
-        cv2.imwrite('/tmp/annotated_image' + '.png', annotated_image)
-        # Plot pose world landmarks.
-        mp_drawing.plot_landmarks(
-            results.pose_world_landmarks, mp_pose.POSE_CONNECTIONS)
+    # def draw_image_landmarks(self, annotated_image, results):
+    #     mp_drawing.draw_landmarks(
+    #             annotated_image,
+    #             results.pose_landmarks,
+    #             mp_pose.POSE_CONNECTIONS,
+    #             landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+    #     cv2.imwrite('/tmp/annotated_image' + '.png', annotated_image)
+    #     # Plot pose world landmarks.
+    #     mp_drawing.plot_landmarks(
+    #         results.pose_world_landmarks, mp_pose.POSE_CONNECTIONS)
 
     def mean_difference(self, dict):
         reference_list = []

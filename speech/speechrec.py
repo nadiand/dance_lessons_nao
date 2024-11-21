@@ -3,8 +3,8 @@ import speech_recognition as sr
 from transformers import pipeline
 import librosa
 
-
 class SpeechRecognition:
+    MIC = 1
     DEVICE = "cpu" 
     MODEL_NAME = "openai/whisper-tiny.en"  
 
@@ -24,7 +24,7 @@ class SpeechRecognition:
         self.pipe.model.config.forced_decoder_ids = self.pipe.tokenizer.get_decoder_prompt_ids(language="en", task="transcribe")
     
     def speech_recognize(self, time): 
-        with sr.Microphone() as source:
+        with sr.Microphone(self.MIC) as source:
             one = t.time()
             self.r.adjust_for_ambient_noise(source)
             two = t.time()
@@ -47,12 +47,12 @@ class SpeechRecognition:
             return words
         
     def whispermini(self, time):
-        with sr.Microphone() as source:
+        with sr.Microphone(self.MIC) as source:
             self.r.adjust_for_ambient_noise(source)
-            #self.s.ALAudioPlayer.playSine(1000, 10, 1.0, 0.5)
+            self.s.ALAudioPlayer.playSine(1000, 10, 1.0, 0.5)
             print('Listening for audio...')
             audio = self.r.listen(source, phrase_time_limit=time)
-            #self.s.ALAudioPlayer.playSine(2000, 10, 1.0, 0.5)
+            # self.s.ALAudioPlayer.playSine(2000, 10, 1.0, 0.5)
             print('Audio succesfully captured! Now saving and processing audio...')
 
             with open("microphone-results.wav", "wb") as f:
