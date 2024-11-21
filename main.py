@@ -29,7 +29,9 @@ class NaoDanceTutor:
         self.speechrec = speechrec.SpeechRecognition(self.s)
         print('checkpoint posedet')
 
-        self.pose_detector = posedet.PoseDetector(ref_file=r"C:\Users\thoma\Documents\Studie\M1\HRI\dab.jpg", nr_pics=3, verbose=True) # verbose=True????
+        self.pose_detector = posedet.PoseDetector(dance_names=["dab"],
+                                                  ref_files=[r"C:\Users\thoma\Documents\Studie\M1\HRI\dab.jpg"], 
+                                                  nr_pics=3, verbose=True) # verbose=True????
         self.error_threshold = 50
 
     def say(self, message):
@@ -50,6 +52,7 @@ class NaoDanceTutor:
     def teach_move(self):
 
         self.say("Alright! Let me teach you how to do a dab! Watch how I do it.")
+        dance = "dab"
         dab = self.dances.dab(multiplier=3)
         self.s.ALMotion.angleInterpolationBezier(*dab)
         self.say("Now you try to do it!")
@@ -69,7 +72,7 @@ class NaoDanceTutor:
             # Captures images and stores them
             self.pose_detector.take_pics()
             # Evaluates the captured images and returns the best error and image id
-            smallest_error, best_image = self.pose_detector.best_fitting_image_error()
+            smallest_error, best_image, best_mirrored = self.pose_detector.best_fitting_image_error(dance)
 
             if smallest_error < self.error_threshold:
                 if successful_attempts < 1:
@@ -81,7 +84,7 @@ class NaoDanceTutor:
                 if (nr_errors % 2) == 0:
                     self.error_threshold += 10
                 
-                worst_error_bodypart = self.pose_detector.biggest_mistake(best_image)
+                worst_error_bodypart = self.pose_detector.biggest_mistake(best_image, dance, best_mirrored)
                 self.say(f"Nice try! But I think you can do it better. I'll show you again. Pay attention to my {worst_error_bodypart}")
                 dab = self.dances.dab(multiplier=3)
                 self.s.ALMotion.angleInterpolationBezier(*dab)

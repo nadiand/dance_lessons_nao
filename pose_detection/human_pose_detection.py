@@ -11,8 +11,80 @@ mp_pose = mp.solutions.pose
 class PoseDetector:
     ATTRIBUTES = ['left forearm', 'left arm', 'right arm', 'left elbow', 'right elbow', 'right forearm']
    
-    def __init__(self, ref_file, nr_pics, verbose):
-        self.ref_landmarks = self.get_landmark_coords(ref_file)
+    def __init__(self, dance_names, ref_files, nr_pics, verbose):
+        """
+        The arguments:
+        dance_names - list of strings specifying dance names, e.g. ['dab', 'air guitar']
+        ref_files - list of file names corresponding to the reference images of the dances specified in dance_names
+        nr_pics - the number of images taken of student to be checked against reference
+        """
+
+        self.ref_landmarks = {}
+        for i, ref_file in enumerate(ref_files):
+            dance_landmarks = self.get_landmark_coords(ref_file, mirrored=True)
+            self.ref_landmarks[dance_names[i]] = dance_landmarks
+
+        self.reference_dict = {}
+        self.mirrored_reference_dict = {}
+        self.angle_left_elbow_wrist = {}
+        self.angle_left_shoulder_elbow = {}
+        self.angle_right_elbow_wrist = {}
+        self.angle_right_shoulder_elbow = {}
+        self.angle_right_elbow = {}
+        self.angle_left_elbow = {}
+
+        for dance in self.ref_landmarks.keys():
+            ref_list = []
+            mirrored_ref_list = []
+            landmarks = self.ref_landmarks[dance]
+            for mirror_key in landmarks:
+                if mirror_key == "original":
+                    for point in landmarks[mirror_key]:
+                        for coord in landmarks[mirror_key][point]:
+                            ref_list.append(landmarks[mirror_key][point][coord])
+                else:
+                    for point in landmarks[mirror_key]:
+                        for coord in landmarks[mirror_key][point]:
+                            mirrored_ref_list.append(dict[mirror_key][point][coord])
+            self.reference_dict[dance] = np.array(ref_list)
+            self.mirrored_reference_dict[dance] = np.array(ref_list)
+
+            angle_ref_left_elbow_wrist = self.get_angle(self.ref_landmarks["original"]["LEFT_ELBOW"], self.ref_landmarks["original"]["LEFT_WRIST"])
+            angle_ref_left_shoulder_elbow = self.get_angle(self.ref_landmarks["original"]["LEFT_SHOULDER"], self.ref_landmarks["original"]["LEFT_ELBOW"])
+            angle_ref_right_elbow_wrist = self.get_angle(self.ref_landmarks["original"]["RIGHT_ELBOW"], self.ref_landmarks["original"]["RIGHT_WRIST"])
+            angle_ref_right_shoulder_elbow = self.get_angle(self.ref_landmarks["original"]["RIGHT_SHOULDER"], self.ref_landmarks["original"]["RIGHT_ELBOW"])
+            elbow_angle_ref_left = self.get_angle_between_lines(
+                self.ref_landmarks["original"]["LEFT_WRIST"],
+                self.ref_landmarks["original"]["LEFT_SHOULDER"],
+                self.ref_landmarks["original"]["LEFT_ELBOW"]
+            )
+            elbow_angle_ref_right = self.get_angle_between_lines(
+                self.ref_landmarks["original"]["RIGHT_WRIST"],
+                self.ref_landmarks["original"]["RIGHT_SHOULDER"],
+                self.ref_landmarks["original"]["RIGHT_ELBOW"]
+            )
+            mir_angle_ref_left_elbow_wrist = self.get_angle(self.ref_landmarks["mirrored"]["LEFT_ELBOW"], self.ref_landmarks["mirrored"]["LEFT_WRIST"])
+            mir_angle_ref_left_shoulder_elbow = self.get_angle(self.ref_landmarks["mirrored"]["LEFT_SHOULDER"], self.ref_landmarks["mirrored"]["LEFT_ELBOW"])
+            mir_angle_ref_right_elbow_wrist = self.get_angle(self.ref_landmarks["mirrored"]["RIGHT_ELBOW"], self.ref_landmarks["mirrored"]["RIGHT_WRIST"])
+            mir_angle_ref_right_shoulder_elbow = self.get_angle(self.ref_landmarks["mirrored"]["RIGHT_SHOULDER"], self.ref_landmarks["mirrored"]["RIGHT_ELBOW"])
+            mir_elbow_angle_ref_left = self.get_angle_between_lines(
+                self.ref_landmarks["mirrored"]["LEFT_WRIST"],
+                self.ref_landmarks["mirrored"]["LEFT_SHOULDER"],
+                self.ref_landmarks["mirrored"]["LEFT_ELBOW"]
+            )
+            mir_elbow_angle_ref_right = self.get_angle_between_lines(
+                self.ref_landmarks["mirrored"]["RIGHT_WRIST"],
+                self.ref_landmarks["mirrored"]["RIGHT_SHOULDER"],
+                self.ref_landmarks["mirrored"]["RIGHT_ELBOW"]
+            )
+            self.angle_left_elbow_wrist[dance] = (angle_ref_left_elbow_wrist, mir_angle_ref_left_elbow_wrist)
+            self.angle_left_shoulder_elbow[dance] = (angle_ref_left_shoulder_elbow, mir_angle_ref_left_shoulder_elbow)
+            self.angle_right_elbow_wrist[dance] = (angle_ref_right_elbow_wrist, mir_angle_ref_right_elbow_wrist)
+            self.angle_right_shoulder_elbow[dance] = (angle_ref_right_shoulder_elbow, mir_angle_ref_right_shoulder_elbow)
+            self.angle_right_elbow[dance] = (elbow_angle_ref_left, mir_elbow_angle_ref_left)
+            self.angle_left_elbow[dance] = (elbow_angle_ref_right, mir_elbow_angle_ref_right)
+
+
         self.verbose = verbose
         self.nr_pictures = nr_pics
 
@@ -43,7 +115,7 @@ class PoseDetector:
         # to "capture" the camera again and put it intthe beginning of this funciton TODO
 
 
-    def get_landmark_coords(self, file, draw=False):
+    def get_landmark_coords(self, file, mirrored=False, draw=False):
         IMAGE_FILES = (file)
         BG_COLOR = (192, 192, 192) # gray
         with mp_pose.Pose(
@@ -53,17 +125,8 @@ class PoseDetector:
             min_detection_confidence=0.5) as pose:
             # for idx, file in enumerate(IMAGE_FILES):
             image = cv2.imread(IMAGE_FILES)
-            image_height, image_width, _ = image.shape
             # Convert the BGR image to RGB before processing.
             results = pose.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
-
-            # if not results.pose_landmarks:
-            #   continue
-            # print(
-            #     f'Nose coordinates: ('
-            #     f'{results.pose_landmarks.landmark[mp_pose.PoseLandmark.NOSE].x}, '
-            #     f'{results.pose_landmarks.landmark[mp_pose.PoseLandmark.NOSE].y})'
-            # )
 
             if draw:
 
@@ -105,35 +168,35 @@ class PoseDetector:
                 "x": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_SHOULDER].x,
                 "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_SHOULDER].y,
             },
-        },
-        # Left and Right have been flipped, as well as the x cooridnate
-        "mirrored": {
-            "LEFT_WRIST": {
-                "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_WRIST].x,
-                "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_WRIST].y,
-            },
-            "RIGHT_WRIST": {
-                "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_WRIST].x,
-                "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_WRIST].y,
-            },
-            "LEFT_ELBOW": {
-                "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_ELBOW].x,
-                "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_ELBOW].y,
-            },
-            "RIGHT_ELBOW": {
-                "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_ELBOW].x,
-                "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_ELBOW].y,
-            },
-            "LEFT_SHOULDER": {
-                "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_SHOULDER].x,
-                "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_SHOULDER].y,
-            },
-            "RIGHT_SHOULDER": {
-                "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_SHOULDER].x,
-                "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_SHOULDER].y,
-            },
-        },
-        }
+        }}
+        if mirrored:
+            # Left and Right have been flipped, as well as the x cooridnate
+            combined_pos["mirrored"] = {
+                "LEFT_WRIST": {
+                    "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_WRIST].x,
+                    "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_WRIST].y,
+                },
+                "RIGHT_WRIST": {
+                    "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_WRIST].x,
+                    "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_WRIST].y,
+                },
+                "LEFT_ELBOW": {
+                    "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_ELBOW].x,
+                    "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_ELBOW].y,
+                },
+                "RIGHT_ELBOW": {
+                    "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_ELBOW].x,
+                    "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_ELBOW].y,
+                },
+                "LEFT_SHOULDER": {
+                    "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_SHOULDER].x,
+                    "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_SHOULDER].y,
+                },
+                "RIGHT_SHOULDER": {
+                    "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_SHOULDER].x,
+                    "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_SHOULDER].y,
+                },
+            }
 
         return combined_pos
 
@@ -148,28 +211,16 @@ class PoseDetector:
     #     mp_drawing.plot_landmarks(
     #         results.pose_world_landmarks, mp_pose.POSE_CONNECTIONS)
 
-    def mean_difference(self, dict):
-        reference_list = []
-        original_list = []
-        mirrored_list = []
+    def mean_difference(self, dict, dance): # TODO this isnt called anywhere? :D we never use this :D
+        landmarks_list = []
+        for point in dict["original"]:
+            for coord in dict["original"][point]:
+                landmarks_list.append(dict["original"][point][coord])
 
-        for mirror_key in self.ref_landmarks:
-            if mirror_key == "original":
-                for point in self.ref_landmarks[mirror_key]:
-                    for coord in self.ref_landmarks[mirror_key][point]:
-                        reference_list.append(self.ref_landmarks[mirror_key][point][coord]) # TODO calculate this upon init for ref
-                        original_list.append(dict[mirror_key][point][coord])
-        else:
-            for point in self.ref_landmarks[mirror_key]:
-                for coord in self.ref_landmarks[mirror_key][point]:
-                    mirrored_list.append(dict[mirror_key][point][coord])
-
-        reference_arr = np.array(reference_list)
-        original_arr = np.array(original_list)
-        mirrored_arr = np.array(mirrored_list)
+        landmarks_arr = np.array(landmarks_list)
     
-        mean_error_original = abs(reference_arr-original_arr).mean()
-        mean_error_mirrored = abs(reference_arr-mirrored_arr).mean()
+        mean_error_original = abs(self.reference_dict[dance] - landmarks_arr).mean()
+        mean_error_mirrored = abs(self.mirrored_reference_dict[dance] - landmarks_arr).mean()
 
         if self.verbose:
             print("original: ", mean_error_original)
@@ -253,77 +304,64 @@ class PoseDetector:
         
         return angle_deg
 
-    def get_pos_errors(self, pose, mirror_key):
-        # Compute angles for ref # TODO calculate this upon init for ref
-        angle_ref_left_elbow_wrist = self.get_angle(self.ref_landmarks["original"]["LEFT_ELBOW"], self.ref_landmarks["original"]["LEFT_WRIST"])
-        angle_ref_left_shoulder_elbow = self.get_angle(self.ref_landmarks["original"]["LEFT_SHOULDER"], self.ref_landmarks["original"]["LEFT_ELBOW"])
-        angle_ref_right_elbow_wrist = self.get_angle(self.ref_landmarks["original"]["RIGHT_ELBOW"], self.ref_landmarks["original"]["RIGHT_WRIST"])
-        angle_ref_right_shoulder_elbow = self.get_angle(self.ref_landmarks["original"]["RIGHT_SHOULDER"], self.ref_landmarks["original"]["RIGHT_ELBOW"])
-
-        # Compute angles for pose2
-        angle_pose_left_elbow_wrist = self.get_angle(pose[mirror_key]["LEFT_ELBOW"], pose[mirror_key]["LEFT_WRIST"])
-        angle_pose_left_shoulder_elbow = self.get_angle(pose[mirror_key]["LEFT_SHOULDER"], pose[mirror_key]["LEFT_ELBOW"])
-        angle_pose_right_elbow_wrist = self.get_angle(pose[mirror_key]["RIGHT_ELBOW"], pose[mirror_key]["RIGHT_WRIST"])
-        angle_pose_right_shoulder_elbow = self.get_angle(pose[mirror_key]["RIGHT_SHOULDER"], pose[mirror_key]["RIGHT_ELBOW"])
+    def get_pos_errors(self, pose, dance, mirrored):
+        # Compute angles for recorded pose
+        angle_pose_left_elbow_wrist = self.get_angle(pose["original"]["LEFT_ELBOW"], pose["original"]["LEFT_WRIST"])
+        angle_pose_left_shoulder_elbow = self.get_angle(pose["original"]["LEFT_SHOULDER"], pose["original"]["LEFT_ELBOW"])
+        angle_pose_right_elbow_wrist = self.get_angle(pose["original"]["RIGHT_ELBOW"], pose["original"]["RIGHT_WRIST"])
+        angle_pose_right_shoulder_elbow = self.get_angle(pose["original"]["RIGHT_SHOULDER"], pose["original"]["RIGHT_ELBOW"])
 
         # Compute elbow angles using `get_angle_between_lines`
-        elbow_angle_ref_left = self.get_angle_between_lines(
-            self.ref_landmarks["original"]["LEFT_WRIST"],
-            self.ref_landmarks["original"]["LEFT_SHOULDER"],
-            self.ref_landmarks["original"]["LEFT_ELBOW"]
-        )
-        elbow_angle_ref_right = self.get_angle_between_lines(
-            self.ref_landmarks["original"]["RIGHT_WRIST"],
-            self.ref_landmarks["original"]["RIGHT_SHOULDER"],
-            self.ref_landmarks["original"]["RIGHT_ELBOW"]
-        )
         elbow_angle_pose_left = self.get_angle_between_lines(
-            pose[mirror_key]["LEFT_WRIST"],
-            pose[mirror_key]["LEFT_SHOULDER"],
-            pose[mirror_key]["LEFT_ELBOW"]
+            pose["original"]["LEFT_WRIST"],
+            pose["original"]["LEFT_SHOULDER"],
+            pose["original"]["LEFT_ELBOW"]
         )
         elbow_angle_pose_right = self.get_angle_between_lines(
-            pose[mirror_key]["RIGHT_WRIST"],
-            pose[mirror_key]["RIGHT_SHOULDER"],
-            pose[mirror_key]["RIGHT_ELBOW"]
+            pose["original"]["RIGHT_WRIST"],
+            pose["original"]["RIGHT_SHOULDER"],
+            pose["original"]["RIGHT_ELBOW"]
         )
 
         # Compute and print mean differences
-        diff_left_elbow_wrist = abs(angle_ref_left_elbow_wrist - angle_pose_left_elbow_wrist)
-        diff_left_shoulder_elbow = abs(angle_ref_left_shoulder_elbow - angle_pose_left_shoulder_elbow)
-        diff_right_elbow_wrist = abs(angle_ref_right_elbow_wrist - angle_pose_right_elbow_wrist)
-        diff_right_shoulder_elbow = abs(angle_ref_right_shoulder_elbow - angle_pose_right_shoulder_elbow)
-        diff_elbow_left = abs(elbow_angle_ref_left - elbow_angle_pose_left)
-        diff_elbow_right = abs(elbow_angle_ref_right - elbow_angle_pose_right)
+        diff_left_elbow_wrist = abs(self.angle_left_elbow_wrist[dance][int(mirrored)] - angle_pose_left_elbow_wrist)
+        diff_left_shoulder_elbow = abs(self.angle_left_shoulder_elbow[dance][int(mirrored)] - angle_pose_left_shoulder_elbow)
+        diff_right_elbow_wrist = abs(self.angle_right_elbow_wrist[dance][int(mirrored)] - angle_pose_right_elbow_wrist)
+        diff_right_shoulder_elbow = abs(self.angle_right_shoulder_elbow[dance][int(mirrored)] - angle_pose_right_shoulder_elbow)
+        diff_elbow_left = abs(self.angle_left_elbow[dance][int(mirrored)] - elbow_angle_pose_left)
+        diff_elbow_right = abs(self.angle_right_elbow[dance][int(mirrored)] - elbow_angle_pose_right)
 
         if self.verbose:
             print(diff_left_elbow_wrist, diff_right_elbow_wrist, diff_left_shoulder_elbow, diff_right_shoulder_elbow, diff_elbow_left, diff_elbow_right)
 
         return [diff_left_elbow_wrist, diff_left_shoulder_elbow, diff_right_shoulder_elbow, diff_elbow_left, diff_elbow_right, diff_right_elbow_wrist]
 
-    def get_best_error(self, pose):
-        non_mirrored = np.mean(self.get_pos_errors(pose, "original"))
-        mirrored = np.mean(self.get_pos_errors(pose, "mirrored"))
+    def get_best_error(self, pose, dance):
+        error = np.mean(self.get_pos_errors(pose, dance, False))
+        mirrored_error = np.mean(self.get_pos_errors(pose, dance, True))
         if self.verbose:
-            print("non-mirrored: ", non_mirrored)
-            print("mirrored: ", mirrored)
+            print("non-mirrored: ", error)
+            print("mirrored: ", mirrored_error)
 
-        return min(mirrored, non_mirrored)
+        if error < mirrored_error:
+            return error, False
+        return mirrored_error, True
     
-    def best_fitting_image_error(self):
-        best_err, best_pic = np.inf, 0
+    def best_fitting_image_error(self, dance):
+        best_err, best_pic, best_mirrored = np.inf, 0, False
         for i in range(0, self.nr_pictures):
             pos_dict = self.get_landmark_coords('captured_image' + str(i) + '.jpg')
-            err = self.get_best_error(pos_dict)
+            err, mirrored = self.get_best_error(pos_dict, dance)
             if best_err > err:
                 best_err = err
                 best_pic = i
+                best_mirrored = mirrored
 
-        return best_err, best_pic
+        return best_err, best_pic, best_mirrored
     
-    def biggest_mistake(self, pic_id):
+    def biggest_mistake(self, pic_id, dance, mirrored):
         pos_dict = self.get_landmark_coords('captured_image' + str(pic_id) + '.jpg')
-        errors = self.get_pos_errors(pos_dict, "original")
+        errors = self.get_pos_errors(pos_dict, dance, mirrored)
         worst_error = np.argmax(errors)
         return self.ATTRIBUTES[worst_error]
     
