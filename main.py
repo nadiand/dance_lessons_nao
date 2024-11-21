@@ -14,7 +14,6 @@ from pygame import mixer
 
 class NaoDanceTutor:
     """ Main Nao class, from here all other classes are instantiated. """
-    THRESHOLD = 50 # placeholder
     
     def __init__(self):
         # Bridge
@@ -31,6 +30,7 @@ class NaoDanceTutor:
         print('checkpoint posedet')
 
         self.pose_detector = posedet.PoseDetector(ref_file=r"C:\Users\thoma\Documents\Studie\M1\HRI\dab.jpg", nr_pics=3, verbose=True) # verbose=True????
+        self.error_threshold = 50
 
     def say(self, message):
         try:
@@ -55,7 +55,7 @@ class NaoDanceTutor:
         self.say("Now you try to do it!")
         t.sleep(10)
         
-        successful_attempts = 0
+        successful_attempts, nr_errors = 0, 0
         while successful_attempts < 2:
             self.say("Are you ready?")
             x = False
@@ -71,14 +71,16 @@ class NaoDanceTutor:
             # Evaluates the captured images and returns the best error and image id
             smallest_error, best_image = self.pose_detector.best_fitting_image_error()
 
-            if smallest_error < self.THRESHOLD:
+            if smallest_error < self.error_threshold:
                 if successful_attempts < 1:
                     self.say("Amazing! Let's try it again!")
                 successful_attempts += 1
-
-               
             else:
                 successful_attempts = 0
+                nr_errors += 1
+                if (nr_errors % 2) == 0:
+                    self.error_threshold += 10
+                
                 worst_error_bodypart = self.pose_detector.biggest_mistake(best_image)
                 self.say(f"Nice try! But I think you can do it better. I'll show you again. Pay attention to my {worst_error_bodypart}")
                 dab = self.dances.dab(multiplier=3)
