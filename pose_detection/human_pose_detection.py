@@ -326,18 +326,21 @@ class PoseDetector:
         worst_error = np.argmax(errors)
         return self.ATTRIBUTES[worst_error]
     
-    def detect_motion(self, threshold=25):
+    def detect_motion(self, threshold=100):
         # read first two frames
         ret1, frame1 = self.cap.read()
         ret2, frame2 = self.cap.read()
 
+        print("Detecting motion... (scenario will start once detected)")
+
+        counter = 0
         while True:
             if not ret1 and ret2:
                 print("Failed to grab frames.")
                 break
 
             # Display the current frame
-            cv2.imshow("Camera Feed", frame1)
+            #cv2.imshow("Camera Feed", frame1)
 
             # Compute the absolute difference between two frames
             diff = cv2.absdiff(frame1, frame2)
@@ -360,7 +363,10 @@ class PoseDetector:
             # Check if any contour area is large enough to signify motion
             for contour in contours:
                 if cv2.contourArea(contour) > 500:  # Adjust size as needed
-                    return True
+                    counter+=1
+                    print(counter)
+                    if counter>=30:
+                        return True
 
             # Update frames
             frame1 = frame2
