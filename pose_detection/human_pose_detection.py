@@ -42,7 +42,7 @@ class PoseDetector:
         # to "capture" the camera again and put it intthe beginning of this funciton TODO
 
 
-    def get_landmark_coords(self, file):
+    def get_landmark_coords(self, file, draw=False):
         IMAGE_FILES = (file)
         BG_COLOR = (192, 192, 192) # gray
         with mp_pose.Pose(
@@ -64,16 +64,18 @@ class PoseDetector:
             #     f'{results.pose_landmarks.landmark[mp_pose.PoseLandmark.NOSE].y})'
             # )
 
-            annotated_image = image.copy()
-            # Draw segmentation on the image.
-            # To improve segmentation around boundaries, consider applying a joint
-            # bilateral filter to "results.segmentation_mask" with "image".
-            condition = np.stack((results.segmentation_mask,) * 3, axis=-1) > 0.1
-            bg_image = np.zeros(image.shape, dtype=np.uint8)
-            bg_image[:] = BG_COLOR
-            annotated_image = np.where(condition, annotated_image, bg_image)
-            # Draw pose landmarks on the image.
-            self.draw_image_landmarks(annotated_image, results)
+            if draw:
+
+                annotated_image = image.copy()
+                # Draw segmentation on the image.
+                # To improve segmentation around boundaries, consider applying a joint
+                # bilateral filter to "results.segmentation_mask" with "image".
+                condition = np.stack((results.segmentation_mask,) * 3, axis=-1) > 0.1
+                bg_image = np.zeros(image.shape, dtype=np.uint8)
+                bg_image[:] = BG_COLOR
+                annotated_image = np.where(condition, annotated_image, bg_image)
+                # Draw pose landmarks on the image.
+                self.draw_image_landmarks(annotated_image, results)
             
         
         combined_pos = {
@@ -299,11 +301,11 @@ class PoseDetector:
         return [diff_left_elbow_wrist, diff_left_shoulder_elbow, diff_right_shoulder_elbow, diff_elbow_left, diff_elbow_right, diff_right_elbow_wrist]
 
     def get_best_error(self, pose):
-        non_mirrored = np.mean(self.get_pos_errors(self.ref_landmarks, pose, "original"))
-        mirrored = np.mean(self.get_pos_errors(self.ref_landmarks, pose, "mirrored"))
+        non_mirrored = np.mean(self.get_pos_errors(pose, "original"))
+        mirrored = np.mean(self.get_pos_errors(pose, "mirrored"))
         if self.verbose:
-            print(non_mirrored)
-            print(mirrored)
+            print("non-mirrored: ", non_mirrored)
+            print("mirrored: ", mirrored)
 
         return min(mirrored, non_mirrored)
     
@@ -368,75 +370,3 @@ class PoseDetector:
 
 
 
-# to test this:
-# pd = PoseDetector(ref_file='./pictures/not_shit.jpg', nr_pics=3, verbose=True)
-# dab = pd.get_landmark_coords('./pictures/shit.jpg')
-# print(pd.get_best_error(dab))
-
-
-
-# reference = cords('./pictures/reference.jpg')
-# dab = cords('./pictures/dab.jpg')
-# reference = cords('./pictures/good.jpg')
-# bad = cords('./pictures/bad.jpg')
-# passed = cords('./pictures/pass.jpg')
-
-# print("shit")
-# mean_difference(reference, shit, verbose=True)
-# print("not_shit")
-# mean_difference(reference, not_shit, verbose=True)
-# print("dab")
-# mean_difference(reference, dab, verbose=True)
-# print("bad")
-# mean_difference(reference, bad, verbose=True)
-# print("passed")
-# mean_difference(reference, passed, verbose=True)
-# print("reference")
-# mean_difference(reference, reference, verbose=True)
-
-
-# print(reference-dab)
-# print((reference-dab).mean())
-# print((reference-mdab).mean())
-# print((reference-shit).mean())
-# print((reference-mshit).mean())
-# print((reference-bad).mean())
-# print((reference-mbad).mean())
-# print((reference-passed).mean())
-# print((reference-mpassed).mean())
-
-# For webcam input:
-# cap = cv2.VideoCapture(0)
-# with mp_pose.Pose(
-#     min_detection_confidence=0.5,
-#     min_tracking_confidence=0.5) as pose:
-#   print("test")
-#   while cap.isOpened():
-#     success, image = cap.read()
-#     if not success:
-#       print("Ignoring empty camera frame.")
-#       # If loading a video, use 'break' instead of 'continue'.
-#       continue
-
-#     # To improve performance, optionally mark the image as not writeable to
-#     # pass by reference.
-#     image.flags.writeable = False
-#     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-#     results = pose.process(image)
-#     if results.pose_landmarks is not None:
-#       print(results.pose_landmarks.landmark[mp_pose.PoseLandmark.NOSE].x)
-#     # print(results.pose_landmarks)
-
-#     # Draw the pose annotation on the image.
-#     image.flags.writeable = True
-#     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-#     mp_drawing.draw_landmarks(
-#         image,
-#         results.pose_landmarks,
-#         mp_pose.POSE_CONNECTIONS,
-#         landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
-#     # Flip the image horizontally for a selfie-view display.
-#     cv2.imshow('MediaPipe Pose', cv2.flip(image, 1))
-#     if cv2.waitKey(5) & 0xFF == 27:
-#       break
-# cap.release()
