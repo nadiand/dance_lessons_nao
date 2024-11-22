@@ -61,10 +61,20 @@ class NaoDanceTutor:
             t.sleep(self.DANCE_TIMES[dance_type])
         if get_time:
             return self.DANCE_TIMES[dance_type]
+        
+    def get_desired_move(self):
+        self.say("Alright! Would you like to learn how to dab or how to do an air guitar?")
+        input = self.speechrec.whispermini(3.0)
+        if 'dab' in input:
+            dance = 'dab'
+        if 'air' in input or 'guitar' in input:
+            dance = 'air_guitar'
+        
+        return dance
 
     def teach_move(self):
-        self.say("Alright! Let me teach you how to do a dab! Watch how I do it.")
-        dance = "dab"
+        dance = self.get_desired_move()
+        self.say(f"Sure thing! Let me teach you how to do a {dance}! Watch how I do it.")
         self.perform_dance(dance)    # automatically waits for dance to finish, set wait=False to not wait
         self.say("Now you try to do it!")
         
@@ -121,6 +131,8 @@ class NaoDanceTutor:
         # Stop music when dancing done
         mixer.music.stop()
 
+        self.say("Wow, that was fun! I'm a bit tired now to be honest.")
+
     def extract_name(self, text):
         # Extracts name from inputs like "My name is Peter" or "Peter"
         match = re.search(r"\b(?:my name is|name's|i am|i'm)?\s*(\w+)", text, re.IGNORECASE)
@@ -144,18 +156,25 @@ class NaoDanceTutor:
             self.say("First off, you can choose whether you want to learn a dancemove, or to just dance together. What would you prefer?")
 
     def scenario(self):
-        x = False
-        while x is False:
-            #input = self.speechrec.whispermini(3.0)
-            #print('input: ', input)
-            input = 'dance'
+        stop = False
+        counter = 0
+        while stop is False:
+            if counter != 0:
+                self.say("Would you like to learn another move, dance together or stop?")
+
+            input = self.speechrec.whispermini(3.0)
+            print('input: ', input)
+
             if 'learn' in input or 'teach' in input:
                 self.teach_move()
-                x = True
             if 'dance' in input or 'together' in input:
                 self.dance_together()
-                x = True
-    
+            if 'stop' in input or 'quit' in input:
+                self.say("Alright, thanks a lot for joining, I had a lot of fun! I hope to see you again!")
+                stop = True
+
+            counter += 1
+
     def main(self):
         self.introduction()
         self.scenario()
