@@ -16,6 +16,7 @@ import re
 class NaoDanceTutor:
     """ Main Nao class, from here all other classes are instantiated. """
     THRESHOLD = 0.3 # placeholder
+    DANCE_TIMES = {'dab':8, 'air_guitar':10, 'dance_move':12}  # MEASURE ON NAO AND CHANGE ACCORDINGLY
     
     def __init__(self):
         # Bridge
@@ -34,39 +35,29 @@ class NaoDanceTutor:
     def get_speech_time(self, text, wpm=170):
         nr_words = len(text.split())
         return nr_words/(wpm/60)
-    
-    def get_move_time(self, move):
-        if move=='dab':
-            return 8   # change accordingly
-        if move=='airguitar':
-            return 10  # change accordingly
-        
-    def get_combined_time(self, move, text):
-        return self.estimate_move_time(move) + self.get_speech_time(text)
 
-    def say(self, message):
+    def say(self, message, wait=True):
         try:
             self.s.ALTextToSpeech.say(message)
-            est_time = self.get_speech_time(message)
-            print('estimated speech time: ', est_time)
-            t.sleep(est_time)
+            if wait:
+                est_time = self.get_speech_time(message)
+                print('estimated speech time: ', est_time)
+                t.sleep(est_time)
         except Exception as e:
             print(f"Error in say_message: {e}")
-        
-    def test_dance(self):
-        dab = self.dances.dab(multiplier=3)
-        self.s.ALMotion.angleInterpolationBezier(*dab)
-        air_guitar = self.dances.air_guitar(multiplier=2)
-        self.s.ALMotion.angleInterpolationBezier(*air_guitar)
-        dance = self.dances.dance_move(multiplier=3)
-        self.s.ALMotion.angleInterpolationBezier(*dance)
+
+    def perform_dance(self, dance_type, multiplier=3, wait=True, get_time=False):
+        dance_move = getattr(self.dances, dance_type)(multiplier=multiplier)
+        self.s.ALMotion.angleInterpolationBezier(*dance_move)
+        if wait:
+            t.sleep(self.DANCE_TIMES[dance_type])
+        if get_time:
+            return self.DANCE_TIMES[dance_type]
 
     def teach_move(self):
         self.say("Alright! Let me teach you how to do a dab! Watch how I do it.")
         dance = "dab"
-        dab = self.dances.dab(multiplier=3)
-        self.s.ALMotion.angleInterpolationBezier(*dab)
-        t.sleep(self.estimate_move_time(dance))  # is this needed?
+        self.perform_dance(dance)    # automatically waits for dance to finish, set wait=False to not wait
         self.say("Now you try to do it!")
         
         successful_attempts, nr_errors = 0, 0
@@ -96,9 +87,7 @@ class NaoDanceTutor:
                 
                 worst_error_bodypart = self.pose_detector.biggest_mistake(best_image, dance, best_mirrored)
                 self.say(f"Nice try! But I think you can do it better. I'll show you again. Pay attention to my {worst_error_bodypart}")
-                dab = self.dances.dab(multiplier=3)
-                self.s.ALMotion.angleInterpolationBezier(*dab)
-                t.sleep(self.estimate_move_time(dance))
+                self.perform_dance(dance)      # automatically waits
                 self.say("And now you again.")
 
         self.say("Good job! You've learned how to do the dab!")
@@ -109,18 +98,25 @@ class NaoDanceTutor:
 
         # Load and play the audio file
         mixer.music.load(os.path.join(os.getcwd(), file).replace("\\", "/"))
-        mixer.music.play()  # start=64 for funkytown.mp3
+        mixer.music.play(start=64)  # start=64 for funkytown.mp3
     
     def dance_together(self):
         self.say("Alrighty! Are you ready?")
-        t.sleep(2)
         self.say("Here we go!")
+
         # play music and dance
-        self.play_music("sound/Funkytown_cut.wav")
-        self.test_dance()
+        self.play_music("sound/Funkytown.mp3")
+        dance_time = self.perform_dance('dab', wait=False, get_time=True) # perform next code while dancing, and retrieve est time
+
+        start_time = t.time()
+        while t.time() - start_time < dance_time:  # loop for time it takes for Nao to perform dance
+            self.pose_detector.take_pics()
+            move = self.pose_detector.recognize_move()
+            if move:
+                self.say(f'Nice {move}! Keep up the good work!', wait=False)
 
         #stop music when dancing done
-        #mixer.music.stop()
+        mixer.music.stop()
 
     def extract_name(self, text):
         # Extracts name from inputs like "My name is Peter" or "Peter"
@@ -130,7 +126,7 @@ class NaoDanceTutor:
         return None
     
     def introduction(self):
-        if self.pose_detector.detect_motion():
+        if True:  #self.pose_detector.detect_motion():
             self.say("Hi there! What's your name?")
             
             got_name = False
@@ -147,8 +143,9 @@ class NaoDanceTutor:
     def scenario(self):
         x = False
         while x is False:
-            input = self.speechrec.whispermini(3.0)
-            print('input: ', input)
+            #input = self.speechrec.whispermini(3.0)
+            #print('input: ', input)
+            input = 'dance'
             if 'learn' in input or 'teach' in input:
                 self.teach_move()
                 x = True
