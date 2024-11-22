@@ -2,7 +2,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import time
-CAMERA = 1
+CAMERA = 0
 
 # mp_drawing = mp.solutions.drawing_utils
 # mp_drawing_styles = mp.solutions.drawing_styles
@@ -45,37 +45,37 @@ class PoseDetector:
                 else:
                     for point in landmarks[mirror_key]:
                         for coord in landmarks[mirror_key][point]:
-                            mirrored_ref_list.append(dict[mirror_key][point][coord])
+                            mirrored_ref_list.append(landmarks[mirror_key][point][coord])
             self.reference_dict[dance] = np.array(ref_list)
             self.mirrored_reference_dict[dance] = np.array(ref_list)
-
-            angle_ref_left_elbow_wrist = self.get_angle(self.ref_landmarks["original"]["LEFT_ELBOW"], self.ref_landmarks["original"]["LEFT_WRIST"])
-            angle_ref_left_shoulder_elbow = self.get_angle(self.ref_landmarks["original"]["LEFT_SHOULDER"], self.ref_landmarks["original"]["LEFT_ELBOW"])
-            angle_ref_right_elbow_wrist = self.get_angle(self.ref_landmarks["original"]["RIGHT_ELBOW"], self.ref_landmarks["original"]["RIGHT_WRIST"])
-            angle_ref_right_shoulder_elbow = self.get_angle(self.ref_landmarks["original"]["RIGHT_SHOULDER"], self.ref_landmarks["original"]["RIGHT_ELBOW"])
+            
+            angle_ref_left_elbow_wrist = self.get_angle(landmarks["original"]["LEFT_ELBOW"], landmarks["original"]["LEFT_WRIST"])
+            angle_ref_left_shoulder_elbow = self.get_angle(landmarks["original"]["LEFT_SHOULDER"], landmarks["original"]["LEFT_ELBOW"])
+            angle_ref_right_elbow_wrist = self.get_angle(landmarks["original"]["RIGHT_ELBOW"], landmarks["original"]["RIGHT_WRIST"])
+            angle_ref_right_shoulder_elbow = self.get_angle(landmarks["original"]["RIGHT_SHOULDER"], landmarks["original"]["RIGHT_ELBOW"])
             elbow_angle_ref_left = self.get_angle_between_lines(
-                self.ref_landmarks["original"]["LEFT_WRIST"],
-                self.ref_landmarks["original"]["LEFT_SHOULDER"],
-                self.ref_landmarks["original"]["LEFT_ELBOW"]
+                landmarks["original"]["LEFT_WRIST"],
+                landmarks["original"]["LEFT_SHOULDER"],
+                landmarks["original"]["LEFT_ELBOW"]
             )
             elbow_angle_ref_right = self.get_angle_between_lines(
-                self.ref_landmarks["original"]["RIGHT_WRIST"],
-                self.ref_landmarks["original"]["RIGHT_SHOULDER"],
-                self.ref_landmarks["original"]["RIGHT_ELBOW"]
+                landmarks["original"]["RIGHT_WRIST"],
+                landmarks["original"]["RIGHT_SHOULDER"],
+                landmarks["original"]["RIGHT_ELBOW"]
             )
-            mir_angle_ref_left_elbow_wrist = self.get_angle(self.ref_landmarks["mirrored"]["LEFT_ELBOW"], self.ref_landmarks["mirrored"]["LEFT_WRIST"])
-            mir_angle_ref_left_shoulder_elbow = self.get_angle(self.ref_landmarks["mirrored"]["LEFT_SHOULDER"], self.ref_landmarks["mirrored"]["LEFT_ELBOW"])
-            mir_angle_ref_right_elbow_wrist = self.get_angle(self.ref_landmarks["mirrored"]["RIGHT_ELBOW"], self.ref_landmarks["mirrored"]["RIGHT_WRIST"])
-            mir_angle_ref_right_shoulder_elbow = self.get_angle(self.ref_landmarks["mirrored"]["RIGHT_SHOULDER"], self.ref_landmarks["mirrored"]["RIGHT_ELBOW"])
+            mir_angle_ref_left_elbow_wrist = self.get_angle(landmarks["mirrored"]["LEFT_ELBOW"], landmarks["mirrored"]["LEFT_WRIST"])
+            mir_angle_ref_left_shoulder_elbow = self.get_angle(landmarks["mirrored"]["LEFT_SHOULDER"], landmarks["mirrored"]["LEFT_ELBOW"])
+            mir_angle_ref_right_elbow_wrist = self.get_angle(landmarks["mirrored"]["RIGHT_ELBOW"], landmarks["mirrored"]["RIGHT_WRIST"])
+            mir_angle_ref_right_shoulder_elbow = self.get_angle(landmarks["mirrored"]["RIGHT_SHOULDER"], landmarks["mirrored"]["RIGHT_ELBOW"])
             mir_elbow_angle_ref_left = self.get_angle_between_lines(
-                self.ref_landmarks["mirrored"]["LEFT_WRIST"],
-                self.ref_landmarks["mirrored"]["LEFT_SHOULDER"],
-                self.ref_landmarks["mirrored"]["LEFT_ELBOW"]
+                landmarks["mirrored"]["LEFT_WRIST"],
+                landmarks["mirrored"]["LEFT_SHOULDER"],
+                landmarks["mirrored"]["LEFT_ELBOW"]
             )
             mir_elbow_angle_ref_right = self.get_angle_between_lines(
-                self.ref_landmarks["mirrored"]["RIGHT_WRIST"],
-                self.ref_landmarks["mirrored"]["RIGHT_SHOULDER"],
-                self.ref_landmarks["mirrored"]["RIGHT_ELBOW"]
+                landmarks["mirrored"]["RIGHT_WRIST"],
+                landmarks["mirrored"]["RIGHT_SHOULDER"],
+                landmarks["mirrored"]["RIGHT_ELBOW"]
             )
             self.angle_left_elbow_wrist[dance] = (angle_ref_left_elbow_wrist, mir_angle_ref_left_elbow_wrist)
             self.angle_left_shoulder_elbow[dance] = (angle_ref_left_shoulder_elbow, mir_angle_ref_left_shoulder_elbow)
@@ -365,6 +365,11 @@ class PoseDetector:
         worst_error = np.argmax(errors)
         return self.ATTRIBUTES[worst_error]
     
+    def recognize_move(self):
+        "IMPLEMENT"
+        # # dance_move = 
+        # return dance_move if move_detected else None
+    
     def detect_motion(self, threshold=100):
         # read first two frames
         ret1, frame1 = self.cap.read()
@@ -412,6 +417,3 @@ class PoseDetector:
             ret2, frame2 = self.cap.read()
                 
         return False
-
-
-
