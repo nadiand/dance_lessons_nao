@@ -32,6 +32,14 @@ class NaoDanceTutor:
         #                                           nr_pics=3, verbose=True) 
         self.error_threshold = 50
 
+    def play_music(self, file):
+        # Initialize the mixer
+        mixer.init()
+
+        # Load and play the audio file
+        mixer.music.load(os.path.join(os.getcwd(), file).replace("\\", "/"))
+        mixer.music.play(start=64)  # start=64 for funkytown.mp3
+
     def get_speech_time(self, text, wpm=170):
         nr_words = len(text.split())
         return nr_words/(wpm/60)
@@ -91,31 +99,26 @@ class NaoDanceTutor:
                 self.say("And now you again.")
 
         self.say("Good job! You've learned how to do the dab!")
-
-    def play_music(self, file):
-        # Initialize the mixer
-        mixer.init()
-
-        # Load and play the audio file
-        mixer.music.load(os.path.join(os.getcwd(), file).replace("\\", "/"))
-        mixer.music.play(start=64)  # start=64 for funkytown.mp3
     
     def dance_together(self):
         self.say("Alrighty! Are you ready?")
         self.say("Here we go!")
 
-        # play music and dance
+        # Play music and dance
         self.play_music("sound/Funkytown.mp3")
         dance_time = self.perform_dance('dab', wait=False, get_time=True) # perform next code while dancing, and retrieve est time
 
+        # Check for dance moves and praise if executed correctly
         start_time = t.time()
         while t.time() - start_time < dance_time:  # loop for time it takes for Nao to perform dance
             self.pose_detector.take_pics()
             move = self.pose_detector.recognize_move()
             if move:
-                self.say(f'Nice {move}! Keep up the good work!', wait=False)
+                smallest_error, best_image, best_mirrored = self.pose_detector.best_fitting_image_error(move)   # will it automatically take the previous pics?
+                if smallest_error < self.error_threshold:
+                    self.say(f'Nice {move}! Keep up the good work!', wait=False)
 
-        #stop music when dancing done
+        # Stop music when dancing done
         mixer.music.stop()
 
     def extract_name(self, text):
@@ -126,7 +129,7 @@ class NaoDanceTutor:
         return None
     
     def introduction(self):
-        if True:  #self.pose_detector.detect_motion():
+        if self.pose_detector.detect_motion():
             self.say("Hi there! What's your name?")
             
             got_name = False
