@@ -9,11 +9,13 @@ from transformers import pipeline
 import os
 import numpy as np
 from pygame import mixer
+import re
 
 # os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 class NaoDanceTutor:
     """ Main Nao class, from here all other classes are instantiated. """
+    THRESHOLD = 0.3 # placeholder
     
     def __init__(self):
         # Bridge
@@ -22,21 +24,32 @@ class NaoDanceTutor:
         self.s = stk.services.ServiceCache(self.python27bridge)
 
         # Initialize class instances
-        print('checkpoint dance')
         self.dances = dances.Dances()
-        print('checkpoint speechrec')
-
         self.speechrec = speechrec.SpeechRecognition(self.s)
-        print('checkpoint posedet')
-
-        self.pose_detector = posedet.PoseDetector(dance_names=["dab"],
-                                                  ref_files=[r"C:\Users\thoma\Documents\Studie\M1\HRI\dab.jpg"], 
-                                                  nr_pics=3, verbose=True) # verbose=True????
+        # self.pose_detector = posedet.PoseDetector(dance_names=["dab"],
+        #                                           ref_files=[r'C:/Users/luukn/OneDrive/Afbeeldingen/not_shit.jpg'], 
+        #                                           nr_pics=3, verbose=True) 
         self.error_threshold = 50
+
+    def get_speech_time(self, text, wpm=170):
+        nr_words = len(text.split())
+        return nr_words/(wpm/60)
+    
+    def get_move_time(self, move):
+        if move=='dab':
+            return 8   # change accordingly
+        if move=='airguitar':
+            return 10  # change accordingly
+        
+    def get_combined_time(self, move, text):
+        return self.estimate_move_time(move) + self.get_speech_time(text)
 
     def say(self, message):
         try:
             self.s.ALTextToSpeech.say(message)
+            est_time = self.get_speech_time(message)
+            print('estimated speech time: ', est_time)
+            t.sleep(est_time)
         except Exception as e:
             print(f"Error in say_message: {e}")
         
@@ -48,15 +61,13 @@ class NaoDanceTutor:
         dance = self.dances.dance_move(multiplier=3)
         self.s.ALMotion.angleInterpolationBezier(*dance)
 
-    
     def teach_move(self):
-
         self.say("Alright! Let me teach you how to do a dab! Watch how I do it.")
         dance = "dab"
         dab = self.dances.dab(multiplier=3)
         self.s.ALMotion.angleInterpolationBezier(*dab)
+        t.sleep(self.estimate_move_time(dance))  # is this needed?
         self.say("Now you try to do it!")
-        t.sleep(10)
         
         successful_attempts, nr_errors = 0, 0
         while successful_attempts < 2:
@@ -68,7 +79,6 @@ class NaoDanceTutor:
                 if 'yes' in input.lower():
                     x = True
             self.say("One, two, three!")
-            t.sleep(3)
             # Captures images and stores them
             self.pose_detector.take_pics()
             # Evaluates the captured images and returns the best error and image id
@@ -88,7 +98,7 @@ class NaoDanceTutor:
                 self.say(f"Nice try! But I think you can do it better. I'll show you again. Pay attention to my {worst_error_bodypart}")
                 dab = self.dances.dab(multiplier=3)
                 self.s.ALMotion.angleInterpolationBezier(*dab)
-                t.sleep(8)
+                t.sleep(self.estimate_move_time(dance))
                 self.say("And now you again.")
 
         self.say("Good job! You've learned how to do the dab!")
@@ -111,20 +121,29 @@ class NaoDanceTutor:
 
         #stop music when dancing done
         #mixer.music.stop()
+
+    def extract_name(self, text):
+        # Extracts name from inputs like "My name is Peter" or "Peter"
+        match = re.search(r"\b(?:my name is|name's|i am|i'm)?\s*(\w+)", text, re.IGNORECASE)
+        if match:
+            return match.group(1).capitalize()
+        return None
     
     def introduction(self):
-        print(" checkpoint 3")
-
         if self.pose_detector.detect_motion():
             self.say("Hi there! What's your name?")
             
-            name = self.speechrec.whispermini(3.0)
-            print('name:', name)
-            # TODO: make sure it says only name if it detects "my name is .."
+            got_name = False
+            while got_name is False:
+                name = self.extract_name(self.speechrec.whispermini(3.0))
+                if name:
+                    got_name = True
+                else:
+                    self.say("I'm sorry, I didn't get your name. Please say it again.")
+
             self.say(f"Hi {name}! My name is Nao, I am here to teach you some cool moves, but most importantly: to have fun together!")
             self.say("First off, you can choose whether you want to learn a dancemove, or to just dance together. What would you prefer?")
-            t.sleep(15) # prevent from running next code before Nao is finished talking
-        print(" checkpoint 4")
+
     def scenario(self):
         x = False
         while x is False:
@@ -140,12 +159,9 @@ class NaoDanceTutor:
     def main(self):
         self.introduction()
         self.scenario()
-
-    
+  
 if __name__ == "__main__":
-    print(" checkpoint 1")
     nao = NaoDanceTutor()
-    print(" checkpoint 2")
     nao.main()
 
 
