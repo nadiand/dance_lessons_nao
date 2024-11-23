@@ -17,7 +17,6 @@ class NaoDanceTutor:
     """ Main Nao class, from here all other classes are instantiated. """
     THRESHOLD = 0.3 # placeholder
     DANCE_TIMES = {'dab':8, 'air_guitar':10, 'dance_move':12, 'sprinkler':8}  # TODO: MEASURE ON NAO AND CHANGE ACCORDINGLY
-    DANCES = ["dab", "air_guitar", "sprinkler"]
     REF_FILES = [r"C:\Users\thoma\Documents\Studie\M1\HRI\dab.jpg", #dab
                   r"C:\Users\thoma\Documents\Studie\M1\HRI\dab.jpg", # air_guitar
                    r"C:\Users\thoma\Documents\Studie\M1\HRI\dab.jpg"] # sprinkler
@@ -32,7 +31,7 @@ class NaoDanceTutor:
         # Initialize class instances
         self.dances = dances.Dances()
         self.speechrec = speechrec.SpeechRecognition(self.s)
-        self.pose_detector = posedet.PoseDetector(dance_names=self.DANCES,
+        self.pose_detector = posedet.PoseDetector(dance_names=list(self.DANCE_TIMES.keys()),
                                                   ref_files= self.REF_FILES, 
                                                   nr_pics=3, verbose=True) 
         self.error_threshold = 50
@@ -155,6 +154,12 @@ class NaoDanceTutor:
                 self.say("And now you again.")
 
         self.say("Good job! You've learned how to do the dab!")
+
+    def look_for_moves(self):
+        for dance in self.DANCE_TIMES.keys():
+                error, _, _ = self.pose_detector.best_fitting_image_error(dance)
+                if error < self.error_threshold:
+                    self.say(f'Nice {dance}! Keep up the good work', wait=True) # TODO: does this check the same image for each dance?
     
     def dance_together(self):
         self.say("Alrighty! Are you ready?")
@@ -168,11 +173,7 @@ class NaoDanceTutor:
         start_time = t.time()
         while t.time() - start_time < dance_time:  # loop for time it takes for Nao to perform dance
             self.pose_detector.take_pics()
-            move = self.pose_detector.recognize_move()
-            if move:
-                smallest_error, best_image, best_mirrored = self.pose_detector.best_fitting_image_error(move)   # will it automatically take the previous pics?
-                if smallest_error < self.error_threshold:
-                    self.say(f'Nice {move}! Keep up the good work!', wait=False)
+            self.look_for_moves()   
 
         # Stop music when dancing done
         mixer.music.stop()
