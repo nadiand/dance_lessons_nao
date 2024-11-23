@@ -10,16 +10,20 @@ import os
 import numpy as np
 from pygame import mixer
 import re
+import sys
 
 # os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 class NaoDanceTutor:
     """ Main Nao class, from here all other classes are instantiated. """
     THRESHOLD = 0.3 # placeholder
-    DANCE_TIMES = {'dab':8, 'air_guitar':10, 'dance_move':12, 'sprinkler':8}  # TODO: MEASURE ON NAO AND CHANGE ACCORDINGLY
-    REF_FILES = [r"C:\Users\thoma\Documents\Studie\M1\HRI\dab.jpg", #dab
-                  r"C:\Users\thoma\Documents\Studie\M1\HRI\dab.jpg", # air_guitar
-                   r"C:\Users\thoma\Documents\Studie\M1\HRI\dab.jpg"] # sprinkler
+    DANCE_TIMES = {'dab':8, 'air_guitar':12, 'dance_move':12, 'sprinkler':8}  # TODO: MEASURE ON NAO AND CHANGE ACCORDINGLY
+    # REF_FILES = [r"C:\Users\thoma\Documents\Studie\M1\HRI\dab.jpg", #dab
+    #               r"C:\Users\thoma\Documents\Studie\M1\HRI\air_guitar.jpg", # air_guitar
+    #                r"C:\Users\thoma\Documents\Studie\M1\HRI\sprinkler.jpg"] # sprinkler
+    REF_FILES = [r"C:\Users\luukn\OneDrive\Afbeeldingen\not_shit.jpg", 
+                 r"C:\Users\luukn\OneDrive\Afbeeldingen\not_shit.jpg",
+                 r"C:\Users\luukn\OneDrive\Afbeeldingen\not_shit.jpg"]
 
 
     def __init__(self):
@@ -36,13 +40,13 @@ class NaoDanceTutor:
                                                   nr_pics=3, verbose=True) 
         self.error_threshold = 50
 
-    def play_music(self, file):
+    def play_music(self, file, start=0):
         # Initialize the mixer
         mixer.init()
 
         # Load and play the audio file
         mixer.music.load(os.path.join(os.getcwd(), file).replace("\\", "/"))
-        mixer.music.play(start=64)  # start=64 for funkytown.mp3
+        mixer.music.play(start=start)  # start=64 for funkytown.mp3
 
     def init_music(self, file):
         mixer.init()
@@ -51,11 +55,14 @@ class NaoDanceTutor:
         mixer.music.play(-1)
         mixer.music.pause()
 
-    def pause_music(self, fade_duration=1):
+    def pause_music(self, fade_duration=1, stop=False):
         for i in range(100, -1, -1):
             mixer.music.set_volume(i / 100.0)
             t.sleep(fade_duration / 100.0)  # Sleep to simulate fading out over time
-        mixer.music.pause()
+        if stop:
+            mixer.music.stop()
+        else:
+            mixer.music.pause()
  
     def start_music(self, fade_duration=1):
         mixer.music.unpause() 
@@ -153,30 +160,47 @@ class NaoDanceTutor:
                 self.perform_dance(dance)      # automatically waits
                 self.say("And now you again.")
 
+            # check if participant still there
+            if not self.pose_detector.detect_motion(threshold=100, detection_time=5, incremental=False):
+                self.say("It seems like you left. I would love it if you would come back for some dancing.")
+                if self.pose_detector.detect_motion(detection_time=10):
+                    self.say("Welcome back! Let's continue.")
+                else:
+                    self.play_music('sound/EverybodyHurts.mp3', start=139)
+                    self.say("I guess you're not coming back, I will go cry now.")
+                    #t.sleep(20)
+                    #self.pause_music(stop=True)
+                    sys.exit()
+
         self.say("Good job! You've learned how to do the dab!")
 
-    def look_for_moves(self):
+    def look_for_moves(self, current_dance):
         for dance in self.DANCE_TIMES.keys():
                 error, _, _ = self.pose_detector.best_fitting_image_error(dance)
                 if error < self.error_threshold:
+                    self.s.ALMotion.stopMove()
                     self.say(f'Nice {dance}! Keep up the good work', wait=True) # TODO: does this check the same image for each dance?
+                    self.perform_dance(current_dance)
     
     def dance_together(self):
+        dance = 'dab'
         self.say("Alrighty! Are you ready?")
         self.say("Here we go!")
 
         # Play music and dance
-        self.play_music("sound/Funkytown.mp3")
-        dance_time = self.perform_dance('dab', wait=False, get_time=True) # perform next code while dancing, and retrieve est time
+        #self.play_music("sound/Funkytown.mp3")
+        self.start_music()
+        dance_time = self.perform_dance(dance, wait=False, get_time=True) # perform next code while dancing, and retrieve est time
 
         # Check for dance moves and praise if executed correctly
         start_time = t.time()
         while t.time() - start_time < dance_time:  # loop for time it takes for Nao to perform dance
             self.pose_detector.take_pics()
-            self.look_for_moves()   
+            self.look_for_moves(dance)   
 
-        # Stop music when dancing done
-        mixer.music.stop()
+        # Stop leftover dance caused by starting new dance after stopping in look_for_moves()
+        self.ALMotion.stopMove()
+        self.pause_music()
 
         self.say("Wow, that was fun! I'm a bit tired now to be honest.")
 
@@ -188,7 +212,7 @@ class NaoDanceTutor:
         return None
     
     def introduction(self):
-        if self.pose_detector.detect_motion():
+        if self.pose_detector.detect_motion(incremental=30):
             self.say("Hi there! What's your name?")
             
             got_name = False
@@ -203,7 +227,7 @@ class NaoDanceTutor:
             self.say("First off, you can choose whether you want to learn a dancemove, or to just dance together. What would you prefer?")
 
     def scenario(self):
-        self.init_music()
+        self.init_music('sound/boogie_bot_shuffle.mp3')
         stop = False
         counter = 0
         while stop is False:
@@ -213,11 +237,11 @@ class NaoDanceTutor:
             input = self.speechrec.whispermini(3.0)
             print('input: ', input)
 
-            if 'learn' in input or 'teach' in input.lower():
+            if 'learn' in input.lower() or 'teach' in input.lower():
                 self.teach_move()
-            if 'dance' in input or 'together' in input.lower():
+            if 'dance' in input.lower() or 'together' in input.lower():
                 self.dance_together()
-            if 'stop' in input or 'quit' in input.lower():
+            if 'stop' in input.lower() or 'quit' in input.lower():
                 self.say("Alright, thanks a lot for joining, I had a lot of fun! I hope to see you again!")
                 stop = True
 

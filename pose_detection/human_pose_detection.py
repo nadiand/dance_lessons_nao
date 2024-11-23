@@ -1,7 +1,7 @@
 import cv2
 import mediapipe as mp
 import numpy as np
-import time
+import time as t
 CAMERA = 0
 
 # mp_drawing = mp.solutions.drawing_utils
@@ -106,7 +106,7 @@ class PoseDetector:
                 break
             for i in range(0, self.nr_pictures):
                 cv2.imwrite('captured_image' + str(i) + '.jpg', frame)
-                time.sleep(sleep_time)
+                t.sleep(sleep_time)
             if self.verbose:
                 print("Stop taking pictures")
             break
@@ -365,50 +365,67 @@ class PoseDetector:
         worst_error = np.argmax(errors)
         return self.ATTRIBUTES[worst_error]
     
-    def detect_motion(self, threshold=100):
+    def process_frame(self, frame1, frame2, threshold, incremental, counter):
+        # Compute the absolute difference between two frames
+        diff = cv2.absdiff(frame1, frame2)
+        
+        # Convert the difference to grayscale
+        gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
+        
+        # Apply Gaussian blur to reduce noise
+        blur = cv2.GaussianBlur(gray, (5, 5), 0)
+        
+        # Threshold the image to identify significant changes
+        _, thresh = cv2.threshold(blur, threshold, 255, cv2.THRESH_BINARY)
+        
+        # Dilate the thresholded image to fill in small gaps
+        dilated = cv2.dilate(thresh, None, iterations=2)
+        
+        # Find contours (outlines of motion)
+        contours, _ = cv2.findContours(dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+        # Check if any contour area is large enough to signify motion
+        for contour in contours:
+            if cv2.contourArea(contour) > 500:  # Adjust size as needed
+                if incremental:
+                    counter+=1
+                    print(counter)
+                    if counter>=incremental:
+                        return True
+                else:
+                    return True
+                
+        return counter
+
+    
+    def detect_motion(self, threshold=100, detection_time=None, incremental=None):
         # read first two frames
         ret1, frame1 = self.cap.read()
         ret2, frame2 = self.cap.read()
 
-        print("Detecting motion... (scenario will start once detected)")
-
         counter = 0
-        while True:
-            if not ret1 and ret2:
-                print("Failed to grab frames.")
-                break
+        if detection_time:
+            print(f"Detecting motion for {detection_time} seconds...")
+            start_time = t.time()
+            while t.time() - start_time < detection_time:
+                counter = self.process_frame(frame1, frame2, threshold, incremental, counter)
 
-            # Display the current frame
-            #cv2.imshow("Camera Feed", frame1)
+                if counter is True: 
+                    return True
 
-            # Compute the absolute difference between two frames
-            diff = cv2.absdiff(frame1, frame2)
-            
-            # Convert the difference to grayscale
-            gray = cv2.cvtColor(diff, cv2.COLOR_BGR2GRAY)
-            
-            # Apply Gaussian blur to reduce noise
-            blur = cv2.GaussianBlur(gray, (5, 5), 0)
-            
-            # Threshold the image to identify significant changes
-            _, thresh = cv2.threshold(blur, threshold, 255, cv2.THRESH_BINARY)
-            
-            # Dilate the thresholded image to fill in small gaps
-            dilated = cv2.dilate(thresh, None, iterations=2)
-            
-            # Find contours (outlines of motion)
-            contours, _ = cv2.findContours(dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
-            
-            # Check if any contour area is large enough to signify motion
-            for contour in contours:
-                if cv2.contourArea(contour) > 500:  # Adjust size as needed
-                    counter+=1
-                    print(counter)
-                    if counter>=30:
-                        return True
+                # Update frames
+                frame1 = frame2
+                ret2, frame2 = self.cap.read()
+        else:
+            print("Detecting motion... (scenario will start once detected)")
+            while True:
+                counter = self.process_frame(frame1, frame2, threshold, incremental, counter)
 
-            # Update frames
-            frame1 = frame2
-            ret2, frame2 = self.cap.read()
+                if counter is True:  # counter is either int or bool
+                    return True
+
+                # Update frames
+                frame1 = frame2
+                ret2, frame2 = self.cap.read()
                 
         return False
