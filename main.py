@@ -16,8 +16,14 @@ import re
 class NaoDanceTutor:
     """ Main Nao class, from here all other classes are instantiated. """
     THRESHOLD = 0.3 # placeholder
-    DANCE_TIMES = {'dab':8, 'air_guitar':10, 'dance_move':12}  # MEASURE ON NAO AND CHANGE ACCORDINGLY
-    
+    DANCE_TIMES = {'dab':8, 'air_guitar':10, 'dance_move':12, 'sprinkler':8}  # MEASURE ON NAO AND CHANGE ACCORDINGLY
+    # TODO measure sprinkler time
+    DANCES = ["dab", "air_guitar", "sprinkler"]
+    REF_FILES = [r"C:\Users\thoma\Documents\Studie\M1\HRI\dab.jpg", #dab
+                  r"C:\Users\thoma\Documents\Studie\M1\HRI\dab.jpg", # air_guitar
+                   r"C:\Users\thoma\Documents\Studie\M1\HRI\dab.jpg"] # sprinkler
+
+
     def __init__(self):
         # Bridge
         self.python27bridge = stk.python27bridge.Python27Bridge()
@@ -27,9 +33,9 @@ class NaoDanceTutor:
         # Initialize class instances
         self.dances = dances.Dances()
         self.speechrec = speechrec.SpeechRecognition(self.s)
-        # self.pose_detector = posedet.PoseDetector(dance_names=["dab"],
-        #                                           ref_files=[r'C:/Users/luukn/OneDrive/Afbeeldingen/not_shit.jpg'], 
-        #                                           nr_pics=3, verbose=True) 
+        self.pose_detector = posedet.PoseDetector(dance_names=self.DANCES,
+                                                  ref_files= self.REF_FILES, 
+                                                  nr_pics=3, verbose=True) 
         self.error_threshold = 50
 
     def play_music(self, file):
@@ -55,20 +61,36 @@ class NaoDanceTutor:
             print(f"Error in say_message: {e}")
 
     def perform_dance(self, dance_type, multiplier=3, wait=True, get_time=False):
+        self.start_music()
         dance_move = getattr(self.dances, dance_type)(multiplier=multiplier)
         self.s.ALMotion.angleInterpolationBezier(*dance_move)
         if wait:
             t.sleep(self.DANCE_TIMES[dance_type])
         if get_time:
             return self.DANCE_TIMES[dance_type]
+        self.pause_music()
         
     def get_desired_move(self):
-        self.say("Alright! Would you like to learn how to dab or how to do an air guitar?")
-        input = self.speechrec.whispermini(3.0)
-        if 'dab' in input:
-            dance = 'dab'
-        if 'air' in input or 'guitar' in input:
-            dance = 'air_guitar'
+        valid_move = False
+        i = 0
+        while valid_move is False:
+            if i == 0:
+                self.say("Alright! Would you like to learn how to dab, a sprinkler or an air guitar?")
+            else:
+                self.say("Sorry, I didn't understand. Would you like to learn how to dab, a sprinkler or an air guitar?")
+            input = self.speechrec.whispermini(3.0)
+            if 'dab' in input:
+                dance = 'dab'
+                valid_move = True
+            if 'air' in input or 'guitar' in input:
+                dance = 'air_guitar'
+                valid_move = True
+
+            if 'sprinkler' in input or 'sprinter' in input:
+                dance = 'sprinkler'
+                valid_move = True
+
+            i+=1
         
         return dance
 
@@ -87,11 +109,17 @@ class NaoDanceTutor:
                 print('input: ', input)
                 if 'yes' in input.lower():
                     x = True
+                if 'stop' in input.lower():
+                    return
             self.say("One, two, three!")
+
+            self.start_music()
+
             # Captures images and stores them
             self.pose_detector.take_pics()
             # Evaluates the captured images and returns the best error and image id
             smallest_error, best_image, best_mirrored = self.pose_detector.best_fitting_image_error(dance)
+            self.pause_music()
 
             if smallest_error < self.error_threshold:
                 if successful_attempts < 1:
@@ -156,6 +184,7 @@ class NaoDanceTutor:
             self.say("First off, you can choose whether you want to learn a dancemove, or to just dance together. What would you prefer?")
 
     def scenario(self):
+        self.init_music()
         stop = False
         counter = 0
         while stop is False:
@@ -165,15 +194,35 @@ class NaoDanceTutor:
             input = self.speechrec.whispermini(3.0)
             print('input: ', input)
 
-            if 'learn' in input or 'teach' in input:
+            if 'learn' in input or 'teach' in input.lower():
                 self.teach_move()
-            if 'dance' in input or 'together' in input:
+            if 'dance' in input or 'together' in input.lower():
                 self.dance_together()
-            if 'stop' in input or 'quit' in input:
+            if 'stop' in input or 'quit' in input.lower():
                 self.say("Alright, thanks a lot for joining, I had a lot of fun! I hope to see you again!")
                 stop = True
 
             counter += 1
+    def init_music(self):
+        mixer.init()
+        mixer.music.load("sound/boogie_bot_shuffle.mp3")
+        # Play the music and pause immideately
+        mixer.music.play(-1)
+        mixer.music.pause()
+
+    # pause music
+    def pause_music(self, fade_duration=1):
+        for i in range(100, -1, -1):
+            mixer.music.set_volume(i / 100.0)
+            t.sleep(fade_duration / 100.0)  # Sleep to simulate fading out over time
+        mixer.music.pause()
+    # play music 
+    def start_music(self, fade_duration=1):
+        mixer.music.unpause() 
+        for i in range(-1, 100, 1):
+            mixer.music.set_volume(i / 100.0)
+            t.sleep(fade_duration / 100.0)     
+
 
     def main(self):
         self.introduction()

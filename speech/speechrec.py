@@ -62,4 +62,5 @@ class SpeechRecognition:
             wav = librosa.resample(wav, orig_sr=rate, target_sr=16000)
 
             words = self.pipe(wav, batch_size=32)
+            print("WHISPER:", words)
             return words['text']
