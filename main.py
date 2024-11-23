@@ -88,6 +88,7 @@ class NaoDanceTutor:
 
             if 'sprinkler' in input or 'sprinter' in input:
                 dance = 'sprinkler'
+                valid_move = True
 
             i+=1
         
@@ -204,7 +205,7 @@ class NaoDanceTutor:
             counter += 1
     def init_music(self):
         mixer.init()
-        mixer.music.load(r"C:\Users\thoma\Documents\Studie\M1\HRI\boogie_bot_shuffle.mp3")
+        mixer.music.load("sound/boogie_bot_shuffle.mp3")
         # Play the music and pause immideately
         mixer.music.play(-1)
         mixer.music.pause()
