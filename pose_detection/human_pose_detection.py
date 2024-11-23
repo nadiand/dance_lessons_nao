@@ -365,11 +365,6 @@ class PoseDetector:
         worst_error = np.argmax(errors)
         return self.ATTRIBUTES[worst_error]
     
-    def recognize_move(self):
-        "IMPLEMENT"
-        # # dance_move = 
-        # return dance_move if move_detected else None
-    
     def detect_motion(self, threshold=100):
         # read first two frames
         ret1, frame1 = self.cap.read()
