@@ -16,8 +16,7 @@ import re
 class NaoDanceTutor:
     """ Main Nao class, from here all other classes are instantiated. """
     THRESHOLD = 0.3 # placeholder
-    DANCE_TIMES = {'dab':8, 'air_guitar':10, 'dance_move':12, 'sprinkler':8}  # MEASURE ON NAO AND CHANGE ACCORDINGLY
-    # TODO measure sprinkler time
+    DANCE_TIMES = {'dab':8, 'air_guitar':10, 'dance_move':12, 'sprinkler':8}  # TODO: MEASURE ON NAO AND CHANGE ACCORDINGLY
     DANCES = ["dab", "air_guitar", "sprinkler"]
     REF_FILES = [r"C:\Users\thoma\Documents\Studie\M1\HRI\dab.jpg", #dab
                   r"C:\Users\thoma\Documents\Studie\M1\HRI\dab.jpg", # air_guitar
@@ -45,6 +44,25 @@ class NaoDanceTutor:
         # Load and play the audio file
         mixer.music.load(os.path.join(os.getcwd(), file).replace("\\", "/"))
         mixer.music.play(start=64)  # start=64 for funkytown.mp3
+
+    def init_music(self, file):
+        mixer.init()
+        mixer.music.load(file)
+        # Play the music and pause immideately
+        mixer.music.play(-1)
+        mixer.music.pause()
+
+    def pause_music(self, fade_duration=1):
+        for i in range(100, -1, -1):
+            mixer.music.set_volume(i / 100.0)
+            t.sleep(fade_duration / 100.0)  # Sleep to simulate fading out over time
+        mixer.music.pause()
+ 
+    def start_music(self, fade_duration=1):
+        mixer.music.unpause() 
+        for i in range(-1, 100, 1):
+            mixer.music.set_volume(i / 100.0)
+            t.sleep(fade_duration / 100.0) 
 
     def get_speech_time(self, text, wpm=170):
         nr_words = len(text.split())
@@ -79,13 +97,13 @@ class NaoDanceTutor:
             else:
                 self.say("Sorry, I didn't understand. Would you like to learn how to dab, a sprinkler or an air guitar?")
             input = self.speechrec.whispermini(3.0)
+
             if 'dab' in input:
                 dance = 'dab'
                 valid_move = True
             if 'air' in input or 'guitar' in input:
                 dance = 'air_guitar'
                 valid_move = True
-
             if 'sprinkler' in input or 'sprinter' in input:
                 dance = 'sprinkler'
                 valid_move = True
@@ -202,27 +220,7 @@ class NaoDanceTutor:
                 self.say("Alright, thanks a lot for joining, I had a lot of fun! I hope to see you again!")
                 stop = True
 
-            counter += 1
-    def init_music(self):
-        mixer.init()
-        mixer.music.load("sound/boogie_bot_shuffle.mp3")
-        # Play the music and pause immideately
-        mixer.music.play(-1)
-        mixer.music.pause()
-
-    # pause music
-    def pause_music(self, fade_duration=1):
-        for i in range(100, -1, -1):
-            mixer.music.set_volume(i / 100.0)
-            t.sleep(fade_duration / 100.0)  # Sleep to simulate fading out over time
-        mixer.music.pause()
-    # play music 
-    def start_music(self, fade_duration=1):
-        mixer.music.unpause() 
-        for i in range(-1, 100, 1):
-            mixer.music.set_volume(i / 100.0)
-            t.sleep(fade_duration / 100.0)     
-
+            counter += 1    
 
     def main(self):
         self.introduction()
