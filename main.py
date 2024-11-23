@@ -11,6 +11,7 @@ import numpy as np
 from pygame import mixer
 import re
 import sys
+import pyttsx3
 
 # os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
@@ -39,6 +40,9 @@ class NaoDanceTutor:
                                                   ref_files= self.REF_FILES, 
                                                   nr_pics=3, verbose=True) 
         self.error_threshold = 50
+        self.engine = pyttsx3.init()
+        voices = self.engine.getProperty('voices')
+        self.engine.setProperty('voice', voices[1].id)
 
     def play_music(self, file, start=0):
         # Initialize the mixer
@@ -74,13 +78,17 @@ class NaoDanceTutor:
         nr_words = len(text.split())
         return nr_words/(wpm/60)
 
-    def say(self, message, wait=True):
+    def say(self, message, wait=True, speak=True):
         try:
             self.s.ALTextToSpeech.say(message)
             if wait:
-                est_time = self.get_speech_time(message)
-                print('estimated speech time: ', est_time)
-                t.sleep(est_time)
+                if speak:
+                    self.engine.say(message)
+                    self.engine.runAndWait()
+                else:
+                    est_time = self.get_speech_time(message)
+                    print('estimated speech time: ', est_time)
+                    t.sleep(est_time)
         except Exception as e:
             print(f"Error in say_message: {e}")
 
@@ -104,13 +112,13 @@ class NaoDanceTutor:
                 self.say("Sorry, I didn't understand. Would you like to learn how to dab, a sprinkler or an air guitar?")
             input = self.speechrec.whispermini(3.0)
 
-            if 'dab' in input:
+            if 'dab' in input.lower() or 'deb' in input.lower():
                 dance = 'dab'
                 valid_move = True
-            if 'air' in input or 'guitar' in input:
+            if 'air' in input.lower() or 'guitar' in input.lower():
                 dance = 'air_guitar'
                 valid_move = True
-            if 'sprinkler' in input or 'sprinter' in input:
+            if 'sprinkler' in input.lower() or 'sprinter' in input.lower():
                 dance = 'sprinkler'
                 valid_move = True
 
@@ -190,11 +198,12 @@ class NaoDanceTutor:
         # Play music and dance
         #self.play_music("sound/Funkytown.mp3")
         self.start_music()
-        dance_time = self.perform_dance(dance, wait=False, get_time=True) # perform next code while dancing, and retrieve est time
+        dance_time_dab = self.perform_dance(dance, wait=False, get_time=True) # perform next code while dancing, and retrieve est time
+        dance_time_guitar = self.perform_dance('air guitar', wait=False, get_time=True)
 
         # Check for dance moves and praise if executed correctly
         start_time = t.time()
-        while t.time() - start_time < dance_time:  # loop for time it takes for Nao to perform dance
+        while t.time() - start_time < (dance_time_dab+dance_time_guitar):  # loop for time it takes for Nao to perform dance
             self.pose_detector.take_pics()
             self.look_for_moves(dance)   
 
@@ -206,7 +215,7 @@ class NaoDanceTutor:
 
     def extract_name(self, text):
         # Extracts name from inputs like "My name is Peter" or "Peter"
-        match = re.search(r"\b(?:my name is|name's|i am|i'm)?\s*(\w+)", text, re.IGNORECASE)
+        match = re.search(r"\b(?:my name is|name's|i am|i'm|my name's)?\s*(\w+)", text, re.IGNORECASE)
         if match:
             return match.group(1).capitalize()
         return None
@@ -231,8 +240,9 @@ class NaoDanceTutor:
         stop = False
         counter = 0
         while stop is False:
-            if counter != 0:
+            if counter != 0 and not misunderstand:
                 self.say("Would you like to learn another move, dance together or stop?")
+            
 
             input = self.speechrec.whispermini(3.0)
             print('input: ', input)
@@ -244,6 +254,9 @@ class NaoDanceTutor:
             if 'stop' in input.lower() or 'quit' in input.lower():
                 self.say("Alright, thanks a lot for joining, I had a lot of fun! I hope to see you again!")
                 stop = True
+            else:
+                self.say("I'm sorry, I didn't understand that. Could you please say again if you would like to dance together or learn a move?")
+                misunderstand = True
 
             counter += 1    
 
