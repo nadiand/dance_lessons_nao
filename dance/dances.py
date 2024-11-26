@@ -15,7 +15,7 @@ class Dances:
             times2.append(z)
         return times2
 
-    def air_guitar(self, multiplier=2):
+    def airguitar(self, multiplier=2):
         names = list()
         times = list()
         keys = list()
@@ -226,7 +226,7 @@ class Dances:
         return names, self.slow_down(times, multiplier), keys
 
     
-    def dance_move(self, multiplier=2):
+    def dancemove(self, multiplier=2):
         names = list()
         times = list()
         keys = list()

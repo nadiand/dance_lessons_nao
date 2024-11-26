@@ -18,7 +18,7 @@ import pyttsx3
 class NaoDanceTutor:
     """ Main Nao class, from here all other classes are instantiated. """
     THRESHOLD = 0.3 # placeholder
-    DANCE_TIMES = {'dab':8, 'air_guitar':12, 'dance_move':12, 'sprinkler':8}  # TODO: MEASURE ON NAO AND CHANGE ACCORDINGLY
+    DANCE_TIMES = {'dab':8, 'airguitar':12, 'dancemove':12, 'sprinkler':8}  # TODO: MEASURE ON NAO AND CHANGE ACCORDINGLY
     # REF_FILES = [r"C:\Users\thoma\Documents\Studie\M1\HRI\dab.jpg", #dab
     #               r"C:\Users\thoma\Documents\Studie\M1\HRI\air_guitar.jpg", # air_guitar
     #                r"C:\Users\thoma\Documents\Studie\M1\HRI\sprinkler.jpg"] # sprinkler
@@ -47,7 +47,7 @@ class NaoDanceTutor:
 
     def play_music(self, file, start=0):
         # Initialize the mixer
-        #mixer.init()
+        mixer.init()
 
         # Load and play the audio file
         mixer.music.load(os.path.join(os.getcwd(), file).replace("\\", "/"))
@@ -117,7 +117,7 @@ class NaoDanceTutor:
                 dance = 'dab'
                 valid_move = True
             if 'air' in input.lower() or 'guitar' in input.lower():
-                dance = 'air_guitar'
+                dance = 'airguitar'
                 valid_move = True
             if 'sprinkler' in input.lower() or 'sprinter' in input.lower():
                 dance = 'sprinkler'
@@ -175,6 +175,7 @@ class NaoDanceTutor:
                 if self.pose_detector.detect_motion(detection_time=10):
                     self.say("Welcome back! Let's continue.")
                 else:
+                    self.pause_music(stop=True)
                     self.play_music('sound/EverybodyHurts.mp3', start=139)
                     self.say("I guess you're not coming back, I will go cry now.")
                     t.sleep(20)
@@ -262,10 +263,8 @@ class NaoDanceTutor:
             counter += 1    
 
     def main(self):
-        self.init_music('sound/boogie_bot_shuffle.mp3')
-        self.teach_move()
-        # self.introduction()
-        # self.scenario()
+        self.introduction()
+        self.scenario()
   
 if __name__ == "__main__":
     nao = NaoDanceTutor()
