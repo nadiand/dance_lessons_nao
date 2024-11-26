@@ -45,13 +45,13 @@ class NaoDanceTutor:
         voices = self.engine.getProperty('voices')
         self.engine.setProperty('voice', voices[1].id)
 
-    def play_music(self, file, start=0):
-        # Initialize the mixer
-        mixer.init()
+    # def play_music(self, file, start=0):
+    #     # Initialize the mixer
+    #     mixer.init()
 
-        # Load and play the audio file
-        mixer.music.load(os.path.join(os.getcwd(), file).replace("\\", "/"))
-        mixer.music.play(start=start)  # start=64 for funkytown.mp3
+    #     # Load and play the audio file
+    #     mixer.music.load(os.path.join(os.getcwd(), file).replace("\\", "/"))
+    #     mixer.music.play(start=start)  # start=64 for funkytown.mp3
 
     def init_music(self, file):
         mixer.init()
