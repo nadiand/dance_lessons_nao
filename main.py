@@ -56,7 +56,7 @@ class NaoDanceTutor:
     def init_music(self, file):
         mixer.init()
         mixer.music.load(file)
-        # Play the music and pause immideately
+        # Play the music and pause immediately
         mixer.music.play(-1)
         mixer.music.pause()
 
@@ -164,7 +164,7 @@ class NaoDanceTutor:
         early_stop = False
         successful_attempts, nr_errors, loop = 0, 0, 0
         while successful_attempts < 2:
-            if self.stop_learning(loop, early_stop):
+            if self.stop_learning(loop):
                 early_stop = True
                 break
 
@@ -223,7 +223,6 @@ class NaoDanceTutor:
         self.say("Here we go!")
 
         # Play music and dance
-        #self.play_music("sound/Funkytown.mp3")
         self.start_music()
         dance_time_dab = self.perform_dance(dance, wait=False, get_time=True) # perform next code while dancing, and retrieve est time
         dance_time_guitar = self.perform_dance('airguitar', wait=False, get_time=True)
@@ -292,8 +291,10 @@ class NaoDanceTutor:
             counter += 1    
 
     def main(self):
-        self.introduction()
-        self.scenario()
+        self.init_music('sound/boogie_bot_shuffle.mp3')
+        self.teach_move()
+        # self.introduction()
+        # self.scenario()
   
 if __name__ == "__main__":
     nao = NaoDanceTutor()

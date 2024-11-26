@@ -96,6 +96,7 @@ class PoseDetector:
             print("Camera opened")
 
     def take_pics(self, sleep_time = 0.5):
+        # TODO: fix sleep time (takes only one picture and saves it 3 times or smth)
         if self.verbose:
             print("Start taking pictures")
         while True:
@@ -411,6 +412,7 @@ class PoseDetector:
                 counter = self.process_frame(frame1, frame2, threshold, incremental, counter)
 
                 if counter is True: 
+                    print('Motion detected!')
                     return True
 
                 # Update frames
@@ -422,6 +424,7 @@ class PoseDetector:
                 counter = self.process_frame(frame1, frame2, threshold, incremental, counter)
 
                 if counter is True:  # counter is either int or bool
+                    print('Motion detected!')
                     return True
 
                 # Update frames
