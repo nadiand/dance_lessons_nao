@@ -175,13 +175,8 @@ class NaoDanceTutor:
                 if self.pose_detector.detect_motion(detection_time=10):
                     self.say("Welcome back! Let's continue.")
                 else:
-<<<<<<< HEAD
                     self.init_music("sound/EverybodyHurts.mp3")
                     self.start_music()
-=======
-                    self.pause_music(stop=True)
-                    self.play_music('sound/EverybodyHurts.mp3', start=139)
->>>>>>> 2072270097cdcdd8de3ea8e22525fc76aa8ad5d8
                     self.say("I guess you're not coming back, I will go cry now.")
                     t.sleep(20)
                     sys.exit()
