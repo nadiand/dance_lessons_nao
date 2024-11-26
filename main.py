@@ -25,6 +25,7 @@ class NaoDanceTutor:
     REF_FILES = [r"C:\Users\luukn\OneDrive\Afbeeldingen\not_shit.jpg", 
                  r"C:\Users\luukn\OneDrive\Afbeeldingen\not_shit.jpg",
                  r"C:\Users\luukn\OneDrive\Afbeeldingen\not_shit.jpg"]
+    SPEAK = True # for simulation
 
 
     def __init__(self):
@@ -46,7 +47,7 @@ class NaoDanceTutor:
 
     def play_music(self, file, start=0):
         # Initialize the mixer
-        mixer.init()
+        #mixer.init()
 
         # Load and play the audio file
         mixer.music.load(os.path.join(os.getcwd(), file).replace("\\", "/"))
@@ -78,11 +79,11 @@ class NaoDanceTutor:
         nr_words = len(text.split())
         return nr_words/(wpm/60)
 
-    def say(self, message, wait=True, speak=True):
+    def say(self, message, wait=True):
         try:
             self.s.ALTextToSpeech.say(message)
             if wait:
-                if speak:
+                if self.SPEAK:
                     self.engine.say(message)
                     self.engine.runAndWait()
                 else:
@@ -176,7 +177,7 @@ class NaoDanceTutor:
                 else:
                     self.play_music('sound/EverybodyHurts.mp3', start=139)
                     self.say("I guess you're not coming back, I will go cry now.")
-                    #t.sleep(20)
+                    t.sleep(20)
                     #self.pause_music(stop=True)
                     sys.exit()
 
@@ -261,8 +262,10 @@ class NaoDanceTutor:
             counter += 1    
 
     def main(self):
-        self.introduction()
-        self.scenario()
+        self.init_music('sound/boogie_bot_shuffle.mp3')
+        self.teach_move()
+        # self.introduction()
+        # self.scenario()
   
 if __name__ == "__main__":
     nao = NaoDanceTutor()
