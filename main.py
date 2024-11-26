@@ -76,10 +76,12 @@ class NaoDanceTutor:
             t.sleep(fade_duration / 100.0) 
 
     def get_speech_time(self, text, wpm=170):
+        """ Estimate speech time of text given specified words per minute. """
         nr_words = len(text.split())
         return nr_words/(wpm/60)
 
     def say(self, message, wait=True):
+        """ Make Nao speak and sleep for estimated amount of speech time. """
         try:
             self.s.ALTextToSpeech.say(message)
             if wait:
@@ -94,6 +96,7 @@ class NaoDanceTutor:
             print(f"Error in say_message: {e}")
 
     def perform_dance(self, dance_type, multiplier=3, wait=True, get_time=False):
+        """ Perform dance_type and sleep until finished. """
         self.start_music()
         dance_move = getattr(self.dances, dance_type)(multiplier=multiplier)
         self.s.ALMotion.angleInterpolationBezier(*dance_move)
@@ -104,7 +107,7 @@ class NaoDanceTutor:
         self.pause_music()
 
     def find_movement(self):
-        # check if participant still there
+        """ Check if participant still there. """
         if not self.pose_detector.detect_motion(threshold=100, detection_time=5, incremental=False):
             self.say("It seems like you left. I would love it if you would come back for some dancing.")
             if self.pose_detector.detect_motion(detection_time=10):
@@ -117,6 +120,7 @@ class NaoDanceTutor:
                 sys.exit()
         
     def get_desired_move(self):
+        """ Obtain move to teach. """
         valid_move = False
         i = 0
         while valid_move is False:
@@ -141,6 +145,7 @@ class NaoDanceTutor:
         return dance
     
     def stop_learning(self, loop):
+        """ Ask if participant still wants to continue learning every 2 loops. """
         if loop%2==0 and loop!=0:
                 self.say("Do you still want to continue, or do you want to do something else?")
                 input = self.speechrec.whispermini(3.0)
@@ -150,6 +155,7 @@ class NaoDanceTutor:
 
 
     def teach_move(self):
+        """ Teach dance move in loop structure. """
         dance = self.get_desired_move()
         self.say(f"Sure thing! Let me teach you how to do a {dance}! Watch how I do it.")
         self.perform_dance(dance)    # automatically waits for dance to finish, set wait=False to not wait
@@ -203,6 +209,7 @@ class NaoDanceTutor:
             self.say("Good job! You've learned how to do the dab!")
 
     def look_for_moves(self, current_dance):
+        """ Loop over all dances to see if performed participant dance matches to one of the saved ones, praise if yes. """
         for dance in self.DANCE_TIMES.keys():
                 error, _, _ = self.pose_detector.best_fitting_image_error(dance)
                 if error < self.error_threshold:
@@ -234,13 +241,14 @@ class NaoDanceTutor:
         self.say("Wow, that was fun! I'm a bit tired now to be honest.")
 
     def extract_name(self, text):
-        # Extracts name from inputs like "My name is Peter" or "Peter"
+        """ Extract name from inputs like "My name is Peter" or "Peter". """
         match = re.search(r"\b(?:my name is|name's|i am|i'm|my name's)?\s*(\w+)", text, re.IGNORECASE)
         if match:
             return match.group(1).capitalize()
         return None
     
     def introduction(self):
+        """ Introduction of Nao. """
         if self.pose_detector.detect_motion(incremental=30):
             self.say("Hi there! What's your name?")
             
@@ -256,6 +264,7 @@ class NaoDanceTutor:
             self.say("First off, you can choose whether you want to learn a dancemove, or to just dance together. What would you prefer?")
 
     def scenario(self):
+        """ Overall scenario loop. """
         self.init_music('sound/boogie_bot_shuffle.mp3')
         stop = False
         counter = 0
