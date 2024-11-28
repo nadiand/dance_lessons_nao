@@ -7,6 +7,7 @@ class SpeechRecognition:
     MIC = 1
     DEVICE = "cpu" 
     MODEL_NAME = "openai/whisper-tiny.en"  
+    BEEP = True
 
     def __init__(self, s):
         self.r = sr.Recognizer()    
@@ -49,10 +50,12 @@ class SpeechRecognition:
     def whispermini(self, time):
         with sr.Microphone(self.MIC) as source:
             self.r.adjust_for_ambient_noise(source)
-            #self.s.ALAudioPlayer.playSine(1000, 10, 1.0, 0.5)
+            if self.BEEP is True:
+                self.s.ALAudioPlayer.playSine(1000, 10, 1.0, 0.5)
             print('Listening for audio...')
             audio = self.r.listen(source, phrase_time_limit=time)
-            # self.s.ALAudioPlayer.playSine(2000, 10, 1.0, 0.5)
+            if self.BEEP is True:
+                self.s.ALAudioPlayer.playSine(2000, 10, 1.0, 0.5)
             print('Audio succesfully captured! Now saving and processing audio...')
 
             with open("microphone-results.wav", "wb") as f:

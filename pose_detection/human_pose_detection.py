@@ -2,7 +2,7 @@ import cv2
 import mediapipe as mp
 import numpy as np
 import time as t
-CAMERA = 0
+CAMERA = 1
 
 # mp_drawing = mp.solutions.drawing_utils
 # mp_drawing_styles = mp.solutions.drawing_styles
@@ -100,11 +100,12 @@ class PoseDetector:
             print("Start taking pictures")
         while True:
             # Read the video frame-by-frame
-            ret, frame = self.cap.read()
-            if not ret:
-                print("Error: Unable to capture video.")
-                break
+            
             for i in range(0, self.nr_pictures):
+                ret, frame = self.cap.read()
+                if not ret:
+                    print("Error: Unable to capture video.")
+                    break
                 cv2.imwrite('captured_image' + str(i) + '.jpg', frame)
                 t.sleep(sleep_time)
             if self.verbose:

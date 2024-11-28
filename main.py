@@ -18,14 +18,14 @@ import pyttsx3
 class NaoDanceTutor:
     """ Main Nao class, from here all other classes are instantiated. """
     THRESHOLD = 0.3 # placeholder
-    DANCE_TIMES = {'dab':8, 'airguitar':12, 'dancemove':12, 'sprinkler':8}  # TODO: MEASURE ON NAO AND CHANGE ACCORDINGLY
-    # REF_FILES = [r"C:\Users\thoma\Documents\Studie\M1\HRI\dab.jpg", #dab
-    #               r"C:\Users\thoma\Documents\Studie\M1\HRI\air_guitar.jpg", # air_guitar
-    #                r"C:\Users\thoma\Documents\Studie\M1\HRI\sprinkler.jpg"] # sprinkler
-    REF_FILES = [r"C:\Users\luukn\OneDrive\Afbeeldingen\not_shit.jpg", 
-                 r"C:\Users\luukn\OneDrive\Afbeeldingen\not_shit.jpg",
-                 r"C:\Users\luukn\OneDrive\Afbeeldingen\not_shit.jpg"]
-    SPEAK = True # for simulation
+    DANCE_TIMES = {'dab':8, 'airguitar':12, 'sprinkler':8}  # TODO: MEASURE ON NAO AND CHANGE ACCORDINGLY
+    REF_FILES = [r"C:\Users\thoma\Documents\Studie\M1\HRI\ref_imgs\dab_ref.jpg", #dab
+                  r"C:\Users\thoma\Documents\Studie\M1\HRI\ref_imgs\guitar_ref_2.jpg", # air_guitar
+                   r"C:\Users\thoma\Documents\Studie\M1\HRI\ref_imgs\sprinkler_ref_2.jpg"] # sprinkler
+    # REF_FILES = [r"C:\Users\luukn\OneDrive\Afbeeldingen\not_shit.jpg", 
+    #              r"C:\Users\luukn\OneDrive\Afbeeldingen\not_shit.jpg",
+    #              r"C:\Users\luukn\OneDrive\Afbeeldingen\not_shit.jpg"]
+    SPEAK = False # for simulation
 
 
     def __init__(self):
@@ -38,12 +38,12 @@ class NaoDanceTutor:
         self.dances = dances.Dances()
         self.speechrec = speechrec.SpeechRecognition(self.s)
         self.pose_detector = posedet.PoseDetector(dance_names=list(self.DANCE_TIMES.keys()),
-                                                  ref_files= self.REF_FILES, 
+                                                  ref_files=self.REF_FILES, 
                                                   nr_pics=3, verbose=True) 
         self.error_threshold = 50
-        self.engine = pyttsx3.init()
-        voices = self.engine.getProperty('voices')
-        self.engine.setProperty('voice', voices[1].id)
+        # self.engine = pyttsx3.init()
+        # voices = self.engine.getProperty('voices')
+        # self.engine.setProperty('voice', voices[1].id)
 
     # def play_music(self, file, start=0):
     #     # Initialize the mixer
@@ -75,7 +75,7 @@ class NaoDanceTutor:
             mixer.music.set_volume(i / 100.0)
             t.sleep(fade_duration / 100.0) 
 
-    def get_speech_time(self, text, wpm=170):
+    def get_speech_time(self, text, wpm=155):
         nr_words = len(text.split())
         return nr_words/(wpm/60)
 
@@ -200,11 +200,13 @@ class NaoDanceTutor:
         #self.play_music("sound/Funkytown.mp3")
         self.start_music()
         dance_time_dab = self.perform_dance(dance, wait=False, get_time=True) # perform next code while dancing, and retrieve est time
-        dance_time_guitar = self.perform_dance('air guitar', wait=False, get_time=True)
+        dance_time_guitar = self.perform_dance('airguitar', wait=False, get_time=True)
+        dance_time_sprinkler = self.perform_dance('sprinkler', wait=False, get_time=True)
+
 
         # Check for dance moves and praise if executed correctly
         start_time = t.time()
-        while t.time() - start_time < (dance_time_dab+dance_time_guitar):  # loop for time it takes for Nao to perform dance
+        while t.time() - start_time < (dance_time_dab+dance_time_guitar +dance_time_sprinkler):  # loop for time it takes for Nao to perform dance
             self.pose_detector.take_pics()
             self.look_for_moves(dance)   
 
@@ -264,6 +266,13 @@ class NaoDanceTutor:
     def main(self):
         self.introduction()
         self.scenario()
+        
+        # print('dab')
+        # self.perform_dance('dab', 2.5)
+        # print('airguitar')
+        # self.perform_dance('airguitar', 2.5)
+        # print('sprinkler')
+        # self.perform_dance('sprinkler', 2.5)
   
 if __name__ == "__main__":
     nao = NaoDanceTutor()
