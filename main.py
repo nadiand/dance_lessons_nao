@@ -103,6 +103,7 @@ class NaoDanceTutor:
         if wait:
             t.sleep(self.DANCE_TIMES[dance_type])
         if get_time:
+            self.pause_music()
             return self.DANCE_TIMES[dance_type]
         self.pause_music()
 
@@ -206,7 +207,7 @@ class NaoDanceTutor:
             loop+=1
 
         if not early_stop:
-            self.say("Good job! You've learned how to do the dab!")
+            self.say("Good job! You've learned how to dance!")
 
     def look_for_moves(self, current_dance):
         """ Loop over all dances to see if performed participant dance matches to one of the saved ones, praise if yes. """
@@ -218,23 +219,28 @@ class NaoDanceTutor:
                     self.perform_dance(current_dance)
     
     def dance_together(self):
-        dance = 'dab'
         self.say("Alrighty! Are you ready?")
         self.say("Here we go!")
 
         # Play music and dance
         self.start_music()
-        dance_time_dab = self.perform_dance(dance, wait=False, get_time=True) # perform next code while dancing, and retrieve est time
+        dance_time_dab = self.perform_dance('dab', wait=False, get_time=True) # perform next code while dancing, and retrieve est time
         dance_time_guitar = self.perform_dance('airguitar', wait=False, get_time=True)
         dance_time_sprinkler = self.perform_dance('sprinkler', wait=False, get_time=True)
+        
+        print("dance_time_done")
 
 
         # Check for dance moves and praise if executed correctly
         start_time = t.time()
         while t.time() - start_time < (dance_time_dab+dance_time_guitar +dance_time_sprinkler):  # loop for time it takes for Nao to perform dance
+            print("checking")
             self.pose_detector.take_pics()
-            self.look_for_moves(dance)   
-
+            self.look_for_moves('dab')
+            self.look_for_moves('airguitar')   
+            self.look_for_moves('sprinkler')   
+   
+        print('done checking')
         # Stop leftover dance caused by starting new dance after stopping in look_for_moves()
         self.ALMotion.stopMove()
         self.pause_music()
@@ -293,8 +299,10 @@ class NaoDanceTutor:
             counter += 1    
 
     def main(self):
-        self.introduction()
-        self.scenario()
+        # self.introduction()
+        # self.scenario()
+        self.init_music('sound/boogie_bot_shuffle.mp3')
+        self.dance_together()
         
         # print('dab')
         # self.perform_dance('dab', 2.5)
