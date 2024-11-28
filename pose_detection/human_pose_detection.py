@@ -118,88 +118,93 @@ class PoseDetector:
 
 
     def get_landmark_coords(self, file, mirrored=False, draw=False):
-        IMAGE_FILES = (file)
-        BG_COLOR = (192, 192, 192) # gray
-        with mp_pose.Pose(
-            static_image_mode=True,
-            model_complexity=1,
-            enable_segmentation=True,
-            min_detection_confidence=0.5) as pose:
-            # for idx, file in enumerate(IMAGE_FILES):
-            image = cv2.imread(IMAGE_FILES)
-            # Convert the BGR image to RGB before processing.
-            results = pose.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
+        try:
+            IMAGE_FILES = (file)
+            BG_COLOR = (192, 192, 192) # gray
+            with mp_pose.Pose(
+                static_image_mode=True,
+                model_complexity=1,
+                enable_segmentation=True,
+                min_detection_confidence=0.5) as pose:
+                # for idx, file in enumerate(IMAGE_FILES):
+                image = cv2.imread(IMAGE_FILES)
+                # Convert the BGR image to RGB before processing.
+                results = pose.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
 
-            if draw:
+                if draw:
 
-                annotated_image = image.copy()
-                # Draw segmentation on the image.
-                # To improve segmentation around boundaries, consider applying a joint
-                # bilateral filter to "results.segmentation_mask" with "image".
-                condition = np.stack((results.segmentation_mask,) * 3, axis=-1) > 0.1
-                bg_image = np.zeros(image.shape, dtype=np.uint8)
-                bg_image[:] = BG_COLOR
-                annotated_image = np.where(condition, annotated_image, bg_image)
-                # Draw pose landmarks on the image.
-                self.draw_image_landmarks(annotated_image, results)
+                    annotated_image = image.copy()
+                    # Draw segmentation on the image.
+                    # To improve segmentation around boundaries, consider applying a joint
+                    # bilateral filter to "results.segmentation_mask" with "image".
+                    condition = np.stack((results.segmentation_mask,) * 3, axis=-1) > 0.1
+                    bg_image = np.zeros(image.shape, dtype=np.uint8)
+                    bg_image[:] = BG_COLOR
+                    annotated_image = np.where(condition, annotated_image, bg_image)
+                    # Draw pose landmarks on the image.
+                    self.draw_image_landmarks(annotated_image, results)
+                
             
-        
-        combined_pos = {
-        "original": {
-            "LEFT_WRIST": {
-                "x": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_WRIST].x,
-                "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_WRIST].y,
-            },
-            "RIGHT_WRIST": {
-                "x": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_WRIST].x,
-                "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_WRIST].y,
-            },
-            "LEFT_ELBOW": {
-                "x": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_ELBOW].x,
-                "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_ELBOW].y,
-            },
-            "RIGHT_ELBOW": {
-                "x": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_ELBOW].x,
-                "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_ELBOW].y,
-            },
-            "LEFT_SHOULDER": {
-                "x": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_SHOULDER].x,
-                "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_SHOULDER].y,
-            },
-            "RIGHT_SHOULDER": {
-                "x": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_SHOULDER].x,
-                "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_SHOULDER].y,
-            },
-        }}
-        if mirrored:
-            # Left and Right have been flipped, as well as the x cooridnate
-            combined_pos["mirrored"] = {
+            combined_pos = {
+            "original": {
                 "LEFT_WRIST": {
-                    "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_WRIST].x,
-                    "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_WRIST].y,
-                },
-                "RIGHT_WRIST": {
-                    "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_WRIST].x,
+                    "x": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_WRIST].x,
                     "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_WRIST].y,
                 },
-                "LEFT_ELBOW": {
-                    "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_ELBOW].x,
-                    "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_ELBOW].y,
+                "RIGHT_WRIST": {
+                    "x": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_WRIST].x,
+                    "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_WRIST].y,
                 },
-                "RIGHT_ELBOW": {
-                    "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_ELBOW].x,
+                "LEFT_ELBOW": {
+                    "x": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_ELBOW].x,
                     "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_ELBOW].y,
                 },
-                "LEFT_SHOULDER": {
-                    "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_SHOULDER].x,
-                    "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_SHOULDER].y,
+                "RIGHT_ELBOW": {
+                    "x": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_ELBOW].x,
+                    "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_ELBOW].y,
                 },
-                "RIGHT_SHOULDER": {
-                    "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_SHOULDER].x,
+                "LEFT_SHOULDER": {
+                    "x": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_SHOULDER].x,
                     "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_SHOULDER].y,
                 },
-            }
-
+                "RIGHT_SHOULDER": {
+                    "x": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_SHOULDER].x,
+                    "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_SHOULDER].y,
+                },
+            }}
+            if mirrored:
+                # Left and Right have been flipped, as well as the x cooridnate
+                combined_pos["mirrored"] = {
+                    "LEFT_WRIST": {
+                        "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_WRIST].x,
+                        "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_WRIST].y,
+                    },
+                    "RIGHT_WRIST": {
+                        "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_WRIST].x,
+                        "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_WRIST].y,
+                    },
+                    "LEFT_ELBOW": {
+                        "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_ELBOW].x,
+                        "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_ELBOW].y,
+                    },
+                    "RIGHT_ELBOW": {
+                        "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_ELBOW].x,
+                        "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_ELBOW].y,
+                    },
+                    "LEFT_SHOULDER": {
+                        "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_SHOULDER].x,
+                        "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.RIGHT_SHOULDER].y,
+                    },
+                    "RIGHT_SHOULDER": {
+                        "x": -results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_SHOULDER].x,
+                        "y": results.pose_world_landmarks.landmark[mp.solutions.pose.PoseLandmark.LEFT_SHOULDER].y,
+                    },
+                }
+        
+        except Exception:
+            print("Error in get_landmark_coords. Maybe could not detect joint positions.")
+            return -1
+            
         return combined_pos
 
     # def draw_image_landmarks(self, annotated_image, results):
@@ -353,6 +358,8 @@ class PoseDetector:
         best_err, best_pic, best_mirrored = np.inf, 0, False
         for i in range(0, self.nr_pictures):
             pos_dict = self.get_landmark_coords('captured_image' + str(i) + '.jpg')
+            if pos_dict == -1:
+                return 0, 0, 0
             err, mirrored = self.get_best_error(pos_dict, dance)
             if best_err > err:
                 best_err = err
@@ -363,6 +370,8 @@ class PoseDetector:
     
     def biggest_mistake(self, pic_id, dance, mirrored):
         pos_dict = self.get_landmark_coords('captured_image' + str(pic_id) + '.jpg')
+        if pos_dict == -1:
+            return 'left forearm'
         errors = self.get_pos_errors(pos_dict, dance, mirrored)
         worst_error = np.argmax(errors)
         return self.ATTRIBUTES[worst_error]

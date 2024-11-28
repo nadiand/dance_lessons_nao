@@ -7,7 +7,7 @@ class SpeechRecognition:
     MIC = 0
     DEVICE = "cpu" 
     MODEL_NAME = "openai/whisper-tiny.en"  
-    BEEP = True
+    BEEP = False
 
     def __init__(self, s):
         self.r = sr.Recognizer()    
@@ -47,13 +47,19 @@ class SpeechRecognition:
 			
             return words
         
-    def whispermini(self, time):
+    def whispermini(self, timeout=7, phrase_time_limit=3.0):
         with sr.Microphone(self.MIC) as source:
             self.r.adjust_for_ambient_noise(source)
             if self.BEEP is True:
                 self.s.ALAudioPlayer.playSine(1000, 10, 1.0, 0.5)
             print('Listening for audio...')
-            audio = self.r.listen(source, phrase_time_limit=time)
+
+            try:
+                audio = self.r.listen(source, timeout=timeout, phrase_time_limit=phrase_time_limit)
+            except Exception:
+                print(f'No speech was detected for {timeout} seconds')
+                return ''
+
             if self.BEEP is True:
                 self.s.ALAudioPlayer.playSine(2000, 10, 1.0, 0.5)
             print('Audio succesfully captured! Now saving and processing audio...')
@@ -65,5 +71,5 @@ class SpeechRecognition:
             wav = librosa.resample(wav, orig_sr=rate, target_sr=16000)
 
             words = self.pipe(wav, batch_size=32)
-            print("WHISPER:", words)
+            print("WHISPER:", words['text'])
             return words['text']

@@ -18,15 +18,11 @@ import pyttsx3
 class NaoDanceTutor:
     """ Main Nao class, from here all other classes are instantiated. """
     THRESHOLD = 0.3 # placeholder
-    DANCE_TIMES = {'dab':8, 'airguitar':12, 'sprinkler':8}  # TODO: MEASURE ON NAO AND CHANGE ACCORDINGLY
-    REF_FILES = [r"C:\Users\thoma\Documents\Studie\M1\HRI\ref_imgs\dab_ref.jpg", #dab
-                  r"C:\Users\thoma\Documents\Studie\M1\HRI\ref_imgs\guitar_ref_2.jpg", # air_guitar
-                   r"C:\Users\thoma\Documents\Studie\M1\HRI\ref_imgs\sprinkler_ref_2.jpg"] # sprinkler
-    # REF_FILES = [r"C:\Users\luukn\OneDrive\Afbeeldingen\not_shit.jpg", 
-    #              r"C:\Users\luukn\OneDrive\Afbeeldingen\not_shit.jpg",
-    #              r"C:\Users\luukn\OneDrive\Afbeeldingen\not_shit.jpg"]
-    SPEAK = False # for simulation
-
+    DANCE_TIMES = {'dab':10, 'airguitar':16, 'sprinkler':17}  # TODO: MEASURE ON NAO AND CHANGE ACCORDINGLY
+    REF_FILES = [r"C:\Users\luukn\OneDrive\Afbeeldingen\dab_ref.jpg", #dab
+                 r"C:\Users\luukn\OneDrive\Afbeeldingen\guitar_ref_1.jpg", # air_guitar
+                 r"C:\Users\luukn\OneDrive\Afbeeldingen\sprinkler_ref_1.jpg"] # sprinkler
+    SPEAK = True # for simulation
 
     def __init__(self):
         # Bridge
@@ -39,19 +35,11 @@ class NaoDanceTutor:
         self.speechrec = speechrec.SpeechRecognition(self.s)
         self.pose_detector = posedet.PoseDetector(dance_names=list(self.DANCE_TIMES.keys()),
                                                   ref_files=self.REF_FILES, 
-                                                  nr_pics=3, verbose=True) 
+                                                  nr_pics=3, verbose=False) 
         self.error_threshold = 50
-        # self.engine = pyttsx3.init()
-        # voices = self.engine.getProperty('voices')
-        # self.engine.setProperty('voice', voices[1].id)
-
-    # def play_music(self, file, start=0):
-    #     # Initialize the mixer
-    #     mixer.init()
-
-    #     # Load and play the audio file
-    #     mixer.music.load(os.path.join(os.getcwd(), file).replace("\\", "/"))
-    #     mixer.music.play(start=start)  # start=64 for funkytown.mp3
+        self.engine = pyttsx3.init()
+        voices = self.engine.getProperty('voices')
+        self.engine.setProperty('voice', voices[1].id)
 
     def init_music(self, file):
         mixer.init()
@@ -95,7 +83,7 @@ class NaoDanceTutor:
         except Exception as e:
             print(f"Error in say_message: {e}")
 
-    def perform_dance(self, dance_type, multiplier=3, wait=True, get_time=False):
+    def perform_dance(self, dance_type, multiplier=3, wait=True, get_time=False, pause_music=True):
         """ Perform dance_type and sleep until finished. """
         self.start_music()
         dance_move = getattr(self.dances, dance_type)(multiplier=multiplier)
@@ -103,9 +91,9 @@ class NaoDanceTutor:
         if wait:
             t.sleep(self.DANCE_TIMES[dance_type])
         if get_time:
-            self.pause_music()
             return self.DANCE_TIMES[dance_type]
-        self.pause_music()
+        if pause_music:
+            self.pause_music()
 
     def find_movement(self):
         """ Check if participant still there. """
@@ -129,9 +117,11 @@ class NaoDanceTutor:
                 self.say("Alright! Would you like to learn how to dab, a sprinkler or an air guitar?")
             else:
                 self.say("Sorry, I didn't understand. Would you like to learn how to dab, a sprinkler or an air guitar?")
-            input = self.speechrec.whispermini(3.0)
+            input = self.speechrec.whispermini()
+            if input == '':
+                self.find_movement()
 
-            if 'dab' in input.lower() or 'deb' in input.lower() or 'dead' in input.lower():
+            if 'dab' in input.lower() or 'deb' in input.lower() or 'dead' in input.lower() or 'dev' in input.lower():
                 dance = 'dab'
                 valid_move = True
             if 'air' in input.lower() or 'guitar' in input.lower():
@@ -149,7 +139,9 @@ class NaoDanceTutor:
         """ Ask if participant still wants to continue learning every 2 loops. """
         if loop%2==0 and loop!=0:
                 self.say("Do you still want to continue, or do you want to do something else?")
-                input = self.speechrec.whispermini(3.0)
+                input = self.speechrec.whispermini()
+                if input == '':
+                    self.find_movement()
                 if 'something' in input.lower() or 'else' in input.lower() or 'stop' in input.lower() or 'quit' in input.lower():
                     return True
         return False
@@ -172,11 +164,14 @@ class NaoDanceTutor:
             self.say("Are you ready?")
             x = False
             while x is False:
-                input = self.speechrec.whispermini(3.0)
+                input = self.speechrec.whispermini()
+                if input == '':  # stop everything if no audio detected
+                    self.find_movement()
+
                 print('input: ', input)
                 if 'yes' in input.lower():
                     x = True
-                if 'stop' in input.lower():
+                if 'stop' in input.lower() or 'no' in input.lower():
                     return
             self.say("One, two, three!")
 
@@ -209,43 +204,35 @@ class NaoDanceTutor:
         if not early_stop:
             self.say(f"Good job! You've learned how to {dance}!")
 
-    def look_for_moves(self, current_dance):
+    def good_move_found(self, dance):
         """ Loop over all dances to see if performed participant dance matches to one of the saved ones, praise if yes. """
-        for dance in self.DANCE_TIMES.keys():
-                error, _, _ = self.pose_detector.best_fitting_image_error(dance)
-                if error < self.error_threshold:
-                    self.s.ALMotion.stopMove()
-                    self.say(f'Nice {dance}! Keep up the good work', wait=True) # TODO: does this check the same image for each dance?
-                    self.perform_dance(current_dance)
+        error, _, _ = self.pose_detector.best_fitting_image_error(dance)
+        if error < self.error_threshold:
+            return True
+
+    def perform_and_check_dance(self, dance):
+        # Play music and dance
+        dance_time = self.perform_dance(dance, wait=False, get_time=True, pause_music=False) # perform next code while dancing, and retrieve est time
+        start_time = t.time()
+        found = False
+        while t.time() - start_time < (dance_time):
+            self.pose_detector.take_pics()
+            if self.good_move_found(dance):
+                self.say(f"Wow! I saw that you did a perfect {dance}")
+
     
     def dance_together(self):
         self.say("Alrighty! Are you ready?")
         self.say("Here we go!")
 
-        # Play music and dance
-        self.start_music()
-        dance_time_dab = self.perform_dance('dab', wait=False, get_time=True) # perform next code while dancing, and retrieve est time
-        dance_time_guitar = self.perform_dance('airguitar', wait=False, get_time=True)
-        dance_time_sprinkler = self.perform_dance('sprinkler', wait=False, get_time=True)
-        
-        print("dance_time_done")
+        # Check for dance moves and praise if executed correctly 
+        for dance in self.DANCE_TIMES.keys():
+            self.perform_and_check_dance(dance)
 
-
-        # Check for dance moves and praise if executed correctly
-        start_time = t.time()
-        while t.time() - start_time < (dance_time_dab+dance_time_guitar +dance_time_sprinkler):  # loop for time it takes for Nao to perform dance
-            print("checking")
-            self.pose_detector.take_pics()
-            self.look_for_moves('dab')
-            self.look_for_moves('airguitar')   
-            self.look_for_moves('sprinkler')   
-   
-        print('done checking')
-        # Stop leftover dance caused by starting new dance after stopping in look_for_moves()
-        self.ALMotion.stopMove()
         self.pause_music()
 
         self.say("Wow, that was fun! I'm a bit tired now to be honest.")
+
 
     def extract_name(self, text):
         """ Extract name from inputs like "My name is Peter" or "Peter". """
@@ -261,7 +248,7 @@ class NaoDanceTutor:
             
             got_name = False
             while got_name is False:
-                name = self.extract_name(self.speechrec.whispermini(3.0))
+                name = self.extract_name(self.speechrec.whispermini())
                 if name:
                     got_name = True
                 else:
@@ -280,8 +267,9 @@ class NaoDanceTutor:
                 self.say("Would you like to learn another move, dance together or stop?")
             
 
-            input = self.speechrec.whispermini(3.0)
-            print('input: ', input)
+            input = self.speechrec.whispermini()
+            if input == '': # stop everything if no audio detected
+                self.find_movement()
 
             if 'learn' in input.lower() or 'teach' in input.lower():
                 self.teach_move()
@@ -299,17 +287,18 @@ class NaoDanceTutor:
             counter += 1    
 
     def main(self):
-        # self.introduction()
-        # self.scenario()
-        self.init_music('sound/boogie_bot_shuffle.mp3')
-        self.dance_together()
-        
+        self.introduction()
+        self.scenario()
+
+        # self.init_music('sound/boogie_bot_shuffle.mp3')
+        # self.dance_together()
+
         # print('dab')
-        # self.perform_dance('dab', 2.5)
+        # self.perform_dance('dab')
         # print('airguitar')
-        # self.perform_dance('airguitar', 2.5)
+        # self.perform_dance('airguitar')
         # print('sprinkler')
-        # self.perform_dance('sprinkler', 2.5)
+        # self.perform_dance('sprinkler')
   
 if __name__ == "__main__":
     nao = NaoDanceTutor()
