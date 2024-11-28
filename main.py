@@ -207,7 +207,7 @@ class NaoDanceTutor:
             loop+=1
 
         if not early_stop:
-            self.say("Good job! You've learned how to dance!")
+            self.say(f"Good job! You've learned how to {dance}!")
 
     def look_for_moves(self, current_dance):
         """ Loop over all dances to see if performed participant dance matches to one of the saved ones, praise if yes. """
