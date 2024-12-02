@@ -24,18 +24,6 @@ class SpeechAlternatives:
                             "Excuse me, I didn't hear your name clearly. Can you repeat it?",
                             "Sorry about that, could you please say your name again?"
                         ]
-        self.greetings = [
-                            f"Hi {name}! My name is Nao, I am here to teach you some cool moves, but most importantly: to have fun together!",
-                            f"Hey {name}! I'm Nao, and I'm excited to teach you some awesome moves and, more importantly, have fun together!",
-                            f"Hello {name}! I'm Nao, and I'm here to show you some cool moves while we have a great time together!",
-                            f"Hi {name}! I'm Nao, ready to teach you some fun moves and, most importantly, enjoy ourselves!",
-                            f"Hey {name}! Nao here! I'm excited to teach you some fun moves, but the best part is having fun together!",
-                            f"Hello {name}! My name's Nao, and I'm here to help you learn some cool moves and, of course, have fun!",
-                            f"Hi {name}! I'm Nao, and I'm looking forward to teaching you some awesome moves and having a blast together!",
-                            f"Hey {name}! It's Nao! Let's learn some cool moves and, most importantly, have a great time together!",
-                            f"Hello {name}! My name is Nao, and I'm here to teach you some cool moves while we enjoy ourselves!",
-                            f"Hi {name}! I'm Nao, ready to show you some great moves, but the most important thing is having fun together!"
-                        ]
         self.intro_options = [
                             "First off, you can choose whether you want to learn a dancemove, or to just dance together. What would you prefer?",
                             "To start, you can decide if you'd like to learn a dance move or just dance together. What do you prefer?",
@@ -51,13 +39,13 @@ class SpeechAlternatives:
         self.scenario_options = [
                             "Would you like to learn another move, dance together or stop?",
                             "Do you want to learn another move, dance together, or quit?",
-                            "Would you prefer to learn another move, keep dancing, or stop for now?",
+                            "Would you prefer to learn another move, just dance together, or stop for now?",
                             "What would you like to do next? Learn another move, dance together, or stop?",
                             "Would you like to try another move, dance together some more, or stop?",
                             "Do you want to continue with another move, dance together, or stop for the moment?",
                             "What's next? Do you want to learn another move, dance together, or stop?",
-                            "Would you like to practice another move, keep dancing, or stop here?",
-                            "Do you want to learn another move, enjoy more dancing, or stop now?",
+                            "Would you like to practice another move, simply dance together, or stop here?",
+                            "Do you want to learn another move, enjoy some dancing, or stop now?",
                             "What's your choice? Learn another move, dance together, or stop?"
                         ]
         self.end_message = [
@@ -108,18 +96,6 @@ class SpeechAlternatives:
                             "Let's get going!",
                             "Here it is!"
                         ]
-        self.dance_together_feedback = [
-                            f"Wow! I saw that you did a perfect {dance}",
-                            f"Impressive! You nailed that {dance}!",
-                            f"Nice! That was a flawless {dance}!",
-                            f"Great job! You did a perfect {dance}!",
-                            f"Wow, that was an amazing {dance}!",
-                            f"Awesome! You pulled off that {dance} perfectly!",
-                            f"That was perfect! I saw you do a great {dance}!",
-                            f"Impressive! Your {dance} was spot on!",
-                            f"Fantastic! You executed that {dance} flawlessly!",
-                            f"Great work! That {dance} was perfect!"
-                        ]
         self.dance_together_end = [
                             "Wow, that was fun! I'm a bit tired now to be honest.",
                             "That was awesome! I'm feeling a little tired now, to be honest.",
@@ -156,17 +132,17 @@ class SpeechAlternatives:
                             "I'm sorry, I didn't understand. Can you clarify if you'd like to learn the dab, a sprinkler, or air guitar?",
                             "Sorry, I didn't get that. Would you like to learn the dab, a sprinkler, or air guitar instead?"
                         ]
-        self.teach_intro = [
-                            f"Sure thing! Let me teach you how to do a {dance}! Watch how I do it.",
-                            f"Alright! Let me show you how to do a {dance}. Pay attention to how I do it.",
-                            f"Of course! Let me teach you the {dance}. Watch closely as I demonstrate it.",
-                            f"Got it! Let me show you how to do a {dance}. Follow along with how I do it.",
-                            f"Absolutely! Let me teach you the {dance}. Keep an eye on how I perform it.",
-                            f"Sure! Let me show you how to do a {dance}. Watch me carefully!",
-                            f"Definitely! I'll teach you the {dance}. Take a look at how I do it.",
-                            f"Alright! I'll show you how to do a {dance}. Watch how I move.",
-                            f"Sounds good! Let me teach you how to do a {dance}. Watch me first!",
-                            f"Absolutely! Let me demonstrate the {dance}. Watch closely and learn!"
+        self.desired_move_other = [
+                            "I'm sorry, I'm not yet able to do other dancemoves. Please select one of the three that I do know.",
+                            "Apologies, I can't do other dance moves yet. Please pick one of the three I know.",
+                            "Sorry, I haven't learned other dance moves yet. Please choose from the three I can show you.",
+                            "I’m sorry, I can’t do any other moves for now. Please select one of the three I know.",
+                            "Sorry, I'm not ready for other dance moves. Please choose one of the three I know.",
+                            "I apologize, but I can only do those three moves. Please pick one from those.",
+                            "Unfortunately, I don't know any other moves yet. Please choose one of the three I know.",
+                            "Sorry, I haven't mastered other moves. Please select from the three I can do.",
+                            "I'm sorry, but I only know those three moves. Please choose one of them.",
+                            "Apologies, I can only show you one of those three moves. Please pick one!"
                         ]
         self.teach_start = [
                             "Now you try to do it!",
@@ -192,18 +168,6 @@ class SpeechAlternatives:
                             "Excellent! Let's give it another try!",
                             "You're doing great! Let's try it again!"
                         ]
-        self.negative_feedback = [
-                            f"Nice try! But I think you can do it better. I'll show you again. Pay attention to my {worst_error_bodypart}",
-                            f"Good attempt! But I think you can improve. Let me show you again. Watch my {worst_error_bodypart}.",
-                            f"Nice effort! I know you can do better. Let me demonstrate again. Focus on my {worst_error_bodypart}.",
-                            f"Good try, but I think you can do it better. Let me show you one more time. Pay attention to my {worst_error_bodypart}.",
-                            f"Nice attempt! But I believe you can do it better. Let me show you again. Look closely at my {worst_error_bodypart}.",
-                            f"Great try! But I think there's room for improvement. Let me show you again. Watch my {worst_error_bodypart}.",
-                            f"Not bad, but I know you can do it even better. Let me demonstrate once more. Pay attention to my {worst_error_bodypart}.",
-                            f"You're getting there! But I think you can improve. Let me show you again. Watch my {worst_error_bodypart} carefully.",
-                            f"Nice work, but I think you can perfect it. Let me demonstrate again. Pay attention to my {worst_error_bodypart}.",
-                            f"Good job, but I know you can do it even better. Let me show you again. Focus on my {worst_error_bodypart} this time."
-                        ]
         self.teach_resume = [
                             "And now you again.",
                             "Your turn again!",
@@ -215,18 +179,6 @@ class SpeechAlternatives:
                             "And now, back to you!",
                             "Alright, now it's your turn again!",
                             "Now let's see you do it again!"
-                        ]
-        self.teach_end = [
-                            f"Good job! You've learned how to do a {dance}!",
-                            f"Great work! You've mastered the {dance}!",
-                            f"Awesome! You've learned how to do the {dance}!",
-                            f"Well done! You now know how to do a {dance}!",
-                            f"Nice job! You've nailed the {dance}!",
-                            f"Fantastic! You've learned the {dance} perfectly!",
-                            f"Excellent! You've got the {dance} down!",
-                            f"Bravo! You've successfully learned the {dance}!",
-                            f"Awesome job! You've learned how to do the {dance}!",
-                            f"Perfect! You've mastered the {dance}!"
                         ]
         self.teach_loop_check = [
                             "Do you still want to continue, or do you want to do something else?",
@@ -276,6 +228,76 @@ class SpeechAlternatives:
                             "I suppose you're not coming back, so I'll go cry now.",
                             "It seems like you're not coming back, time for me to cry."
                         ]
+        
+    def greetings(self, name):
+        return [
+                    f"Hi {name}! My name is Nao, I am here to teach you some cool moves, but most importantly: to have fun together!",
+                    f"Hey {name}! I'm Nao, and I'm excited to teach you some awesome moves and, more importantly, have fun together!",
+                    f"Hello {name}! I'm Nao, and I'm here to show you some cool moves while we have a great time together!",
+                    f"Hi {name}! I'm Nao, ready to teach you some fun moves and, most importantly, enjoy ourselves!",
+                    f"Hey {name}! Nao here! I'm excited to teach you some fun moves, but the best part is having fun together!",
+                    f"Hello {name}! My name's Nao, and I'm here to help you learn some cool moves and, of course, have fun!",
+                    f"Hi {name}! I'm Nao, and I'm looking forward to teaching you some awesome moves and having a blast together!",
+                    f"Hey {name}! It's Nao! Let's learn some cool moves and, most importantly, have a great time together!",
+                    f"Hello {name}! My name is Nao, and I'm here to teach you some cool moves while we enjoy ourselves!",
+                    f"Hi {name}! I'm Nao, ready to show you some great moves, but the most important thing is having fun together!"
+                ]
+    
+    def dance_together_feedback(self, dance):
+        return [
+                    f"Wow! I saw that you did a perfect {dance}",
+                    f"Impressive! You nailed that {dance}!",
+                    f"Nice! That was a flawless {dance}!",
+                    f"Great job! You did a perfect {dance}!",
+                    f"Wow, that was an amazing {dance}!",
+                    f"Awesome! You pulled off that {dance} perfectly!",
+                    f"That was perfect! I saw you do a great {dance}!",
+                    f"Impressive! Your {dance} was spot on!",
+                    f"Fantastic! You executed that {dance} flawlessly!",
+                    f"Great work! That {dance} was perfect!"
+                ]
+    
+    def teach_intro(self, dance):
+        return [
+                    f"Sure thing! Let me teach you how to do a {dance}! Watch how I do it.",
+                    f"Alright! Let me show you how to do a {dance}. Pay attention to how I do it.",
+                    f"Of course! Let me teach you the {dance}. Watch closely as I demonstrate it.",
+                    f"Got it! Let me show you how to do a {dance}. Follow along with how I do it.",
+                    f"Absolutely! Let me teach you the {dance}. Keep an eye on how I perform it.",
+                    f"Sure! Let me show you how to do a {dance}. Watch me carefully!",
+                    f"Definitely! I'll teach you the {dance}. Take a look at how I do it.",
+                    f"Alright! I'll show you how to do a {dance}. Watch how I move.",
+                    f"Sounds good! Let me teach you how to do a {dance}. Watch me first!",
+                    f"Absolutely! Let me demonstrate the {dance}. Watch closely and learn!"
+                ]
+    
+    def negative_feedback(self, worst_error_bodypart):
+        return [
+                    f"Nice try! But I think you can do it better. I'll show you again. Pay attention to my {worst_error_bodypart}",
+                    f"Good attempt! But I think you can improve. Let me show you again. Watch my {worst_error_bodypart}.",
+                    f"Nice effort! I know you can do better. Let me demonstrate again. Focus on my {worst_error_bodypart}.",
+                    f"Good try, but I think you can do it better. Let me show you one more time. Pay attention to my {worst_error_bodypart}.",
+                    f"Nice attempt! But I believe you can do it better. Let me show you again. Look closely at my {worst_error_bodypart}.",
+                    f"Great try! But I think there's room for improvement. Let me show you again. Watch my {worst_error_bodypart}.",
+                    f"Not bad, but I know you can do it even better. Let me demonstrate once more. Pay attention to my {worst_error_bodypart}.",
+                    f"You're getting there! But I think you can improve. Let me show you again. Watch my {worst_error_bodypart} carefully.",
+                    f"Nice work, but I think you can perfect it. Let me demonstrate again. Pay attention to my {worst_error_bodypart}.",
+                    f"Good job, but I know you can do it even better. Let me show you again. Focus on my {worst_error_bodypart} this time."
+                ]
+    
+    def teach_end(self, dance):
+        return [
+                    f"Good job! You've learned how to do a {dance}!",
+                    f"Great work! You've mastered the {dance}!",
+                    f"Awesome! You've learned how to do the {dance}!",
+                    f"Well done! You now know how to do a {dance}!",
+                    f"Nice job! You've nailed the {dance}!",
+                    f"Fantastic! You've learned the {dance} perfectly!",
+                    f"Excellent! You've got the {dance} down!",
+                    f"Bravo! You've successfully learned the {dance}!",
+                    f"Awesome job! You've learned how to do the {dance}!",
+                    f"Perfect! You've mastered the {dance}!"
+                ]
 
 
 

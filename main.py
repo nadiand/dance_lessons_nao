@@ -120,7 +120,11 @@ class NaoDanceTutor:
             if i == 0:
                 self.say(random.choice(self.speech_options.desired_move))
             else:
-                self.say(random.choice(self.speech_options.desired_move_misunderstand))
+                # if user wants another move give appropriate answer
+                if 'another' in input.lower() or 'move' in input.lower() or 'else' in input.lower() or 'other' in input.lower():
+                    self.say(random.choice(self.speech_options.desired_move_other)) 
+                else:
+                    self.say(random.choice(self.speech_options.desired_move_misunderstand))
             input = self.speechrec.whispermini()
             if input == '':
                 self.find_movement()
@@ -131,7 +135,7 @@ class NaoDanceTutor:
             if 'air' in input.lower() or 'guitar' in input.lower():
                 dance = 'airguitar'
                 valid_move = True
-            if 'sprinkler' in input.lower() or 'sprinter' in input.lower():
+            if 'sprinkler' in input.lower() or 'sprinter' in input.lower() or 'spring' in input.lower():
                 dance = 'sprinkler'
                 valid_move = True
 
@@ -150,11 +154,10 @@ class NaoDanceTutor:
                     return True
         return False
 
-
     def teach_move(self):
         """ Teach dance move in loop structure. """
         dance = self.get_desired_move()
-        self.say(f"Sure thing! Let me teach you how to do a {dance}! Watch how I do it.")
+        self.say(random.choice(self.speech_options.teach_intro(dance)))
         self.perform_dance(dance)    # automatically waits for dance to finish, set wait=False to not wait
         self.say(random.choice(self.speech_options.teach_start))
 
@@ -166,15 +169,15 @@ class NaoDanceTutor:
                 break
 
             self.say(random.choice(self.speech_options.dance_together_intro))   
-            x = False
-            while x is False:
+            ready = False
+            while ready is False:
                 input = self.speechrec.whispermini()
                 if input == '':  # stop everything if no audio detected
                     self.find_movement()
 
                 print('input: ', input)
                 if 'yes' in input.lower():
-                    x = True
+                    ready = True
                 if 'stop' in input.lower() or 'no' in input.lower():
                     return
             self.say("One, two, three!")
@@ -198,7 +201,7 @@ class NaoDanceTutor:
                     self.error_threshold += 10
                 
                 worst_error_bodypart = self.pose_detector.biggest_mistake(best_image, dance, best_mirrored)
-                self.say(f"Nice try! But I think you can do it better. I'll show you again. Pay attention to my {worst_error_bodypart}")
+                self.say(random.choice(self.speech_options.negative_feedback(worst_error_bodypart)))
                 self.perform_dance(dance)      # automatically waits
                 self.say(random.choice(self.speech_options.teach_resume))
 
@@ -206,7 +209,7 @@ class NaoDanceTutor:
             loop+=1
 
         if not early_stop:
-            self.say(f"Good job! You've learned how to {dance}!")
+            self.say(random.choice(self.speech_options.teach_end(dance)))
 
     def good_move_found(self, dance):
         """ Loop over all dances to see if performed participant dance matches to one of the saved ones, praise if yes. """
@@ -218,15 +221,25 @@ class NaoDanceTutor:
         # Play music and dance
         dance_time = self.perform_dance(dance, wait=False, get_time=True, pause_music=False) # perform next code while dancing, and retrieve est time
         start_time = t.time()
-        found = False
         while t.time() - start_time < (dance_time):
             self.pose_detector.take_pics()
             if self.good_move_found(dance):
-                self.say(f"Wow! I saw that you did a perfect {dance}")
+                self.say(random.choice(self.speech_options.dance_together_feedback(dance)))
 
     
     def dance_together(self):
         self.say(random.choice(self.speech_options.dance_together_intro))
+        ready = False
+        while ready is False:
+            input = self.speechrec.whispermini()
+            if input == '':  # stop everything if no audio detected
+                self.find_movement()
+
+            print('input: ', input)
+            if 'yes' in input.lower():
+                ready = True
+            if 'stop' in input.lower() or 'no' in input.lower():
+                return
         self.say(random.choice(self.speech_options.dance_together_start))
 
         # Check for dance moves and praise if executed correctly 
@@ -258,7 +271,7 @@ class NaoDanceTutor:
                 else:
                     self.say(random.choice(self.speech_options.not_understood_name))
 
-            self.say(f"Hi {name}! My name is Nao, I am here to teach you some cool moves, but most importantly: to have fun together!")
+            self.say(random.choice(self.speech_options.greetings(name)))
             self.say(random.choice(self.speech_options.intro_options))
 
     def scenario(self):
