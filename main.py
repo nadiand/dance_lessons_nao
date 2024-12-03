@@ -291,7 +291,7 @@ class NaoDanceTutor:
             if 'learn' in input.lower() or 'teach' in input.lower():
                 self.teach_move()
                 misunderstand=False
-            elif 'dance' in input.lower() or 'together' in input.lower():
+            elif 'dance' in input.lower() or 'together' in input.lower() or 'freestyle' in input.lower():
                 self.dance_together()
                 misunderstand=False
             elif 'stop' in input.lower() or 'quit' in input.lower():
