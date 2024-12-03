@@ -1,16 +1,23 @@
 class SpeechAlternatives:
     def __init__(self):
-        self.intro = [
-                            "Hi there! What's your name?",
-                            "Hello! May I ask your name?",
-                            "Hey! What's your name?",
-                            "Hello, what's your name?",
-                            "Hi! Can you tell me your name?",
-                            "Hey there! What's your name?",
-                            "Hi! Who are you?",
-                            "Hello! Could you share your name?",
-                            "Hi! What should I call you?",
-                            "Greetings! What's your name?"
+        self.welcome_message = [
+                            "Hi there! Welcome!",
+                            "Hello! Glad to have you here!",
+                            "Hey! Welcome!",
+                            "Hi! Welcome to the fun!",
+                            "Hello there! Welcome!",
+                            "Hey there! Welcome aboard!",
+                            "Hi! Great to see you!",
+                            "Hi! So happy you're here!",
+                            "Hey! Welcome to the party!"
+                        ]
+        self.ask_name = [
+                            "What's your name?",
+                            "May I ask your name?",
+                            "Can you tell me your name?",
+                            # "Who are you?",
+                            "Could you share your name?",
+                            "What should I call you?",
                         ]
         self.not_understood_name = [
                             "I'm sorry, I didn't get your name. Please say it again.",
@@ -75,14 +82,14 @@ class SpeechAlternatives:
         self.dance_together_intro = [
                             "Alrighty! Are you ready?",
                             "Okay! Are you all set?",
-                            "Great! Are you ready to go?",
+                            "Are you ready to go?",
                             "Alright! Are you prepared?",
-                            "Let's get started! Are you ready?",
+                            "Are you ready?",
                             "Okay then! Are you ready to begin?",
                             "Let's do this! Are you ready?",
                             "Alright! Are you good to go?",
-                            "Great! Are you ready to start?",
-                            "Okay! Are you set to go?"
+                            "Are you ready to start?",
+                            "Are you set to go?"
                         ]
         self.dance_together_start = [
                             "Here we go!",
@@ -269,6 +276,20 @@ class SpeechAlternatives:
                     f"Alright! I'll show you how to do a {dance}. Watch how I move.",
                     f"Sounds good! Let me teach you how to do a {dance}. Watch me first!",
                     f"Absolutely! Let me demonstrate the {dance}. Watch closely and learn!"
+                ]
+    
+    def teach_intro_non_interactive(self, dance):
+        return [
+                    f"Let me teach you how to do a {dance}! Watch how I do it.",
+                    f"Let me show you how to do a {dance}. Pay attention to how I do it.",
+                    f"Let me teach you the {dance}. Watch closely as I demonstrate it.",
+                    f"Let me show you how to do a {dance}. Follow along with how I do it.",
+                    f"Let me teach you the {dance}. Keep an eye on how I perform it.",
+                    f"Let me show you how to do a {dance}. Watch me carefully!",
+                    f"I'll teach you the {dance}. Take a look at how I do it.",
+                    f"I'll show you how to do a {dance}. Watch how I move.",
+                    f"Let me teach you how to do a {dance}. Watch me first!",
+                    f"Let me demonstrate the {dance}. Watch closely and learn!"
                 ]
     
     def negative_feedback(self, worst_error_bodypart):
