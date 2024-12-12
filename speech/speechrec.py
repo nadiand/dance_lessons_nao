@@ -5,10 +5,10 @@ from transformers import pipeline
 import librosa
 
 class SpeechRecognition:
-    MIC = 1
+    MIC = 0
     DEVICE = "cpu" 
     MODEL_NAME = "openai/whisper-tiny.en"  
-    BEEP = True
+    BEEP = False
 
     def __init__(self, s):
         self.r = sr.Recognizer()    

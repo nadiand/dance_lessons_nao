@@ -26,8 +26,9 @@ class NaoDanceTutor:
     REF_FILES = [r"C:\Users\luukn\OneDrive\Afbeeldingen\dab_ref.jpg", #dab
                  r"C:\Users\luukn\OneDrive\Afbeeldingen\guitar_ref_1.jpg", # air_guitar
                  r"C:\Users\luukn\OneDrive\Afbeeldingen\sprinkler_ref_1.jpg"] # sprinkler
-    SPEAK = False # for simulation
-    INTERACTIVE = False
+    SPEAK = True # for simulation
+    INTERACTIVE = True
+    STOP_FLAG = False
 
     def __init__(self):
         # Bridge
@@ -63,14 +64,13 @@ class NaoDanceTutor:
 
     def set_stop_flag(self):
         """ Set the stop flag to True and close the Tkinter window. """
-        print("\n[INFO] Stop button clicked. Terminating program.")
-        self.stop_flag = True
+        self.STOP_FLAG = True
         self.root.destroy()  # Close the Tkinter window
 
     def check_for_stop(self):
         """ Check if the program should stop and exit if necessary. """
-        if self.stop_flag:
-            print("Program terminated by researchers.")
+        if self.STOP_FLAG:
+            print("\n [INFO] Program terminated by researchers.")
             self.say("I'm sorry, but unfortunately we're out of time, thanks a lot for participating and I hope to see you again!", check=False)
             sys.exit()
 
