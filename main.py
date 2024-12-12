@@ -14,6 +14,8 @@ import re
 import sys
 import pyttsx3
 import random
+import threading
+import tkinter as tk
 
 # os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
@@ -45,6 +47,32 @@ class NaoDanceTutor:
         voices = self.engine.getProperty('voices')
         self.engine.setProperty('voice', voices[1].id)
 
+    def gui_stop(self):
+        """ Tkinter GUI for stopping the program. """
+        self.root = tk.Tk()
+        self.root.title("Nao Dance Tutor Controller")
+
+        stop_button = tk.Button(self.root, text="STOP", command=self.set_stop_flag, bg="red", fg="white", font=("Arial", 16))
+        stop_button.pack(padx=20, pady=20)
+
+        label = tk.Label(self.root, text="Click STOP to terminate the program", font=("Arial", 12))
+        label.pack()
+
+        # Start the Tkinter event loop
+        self.root.mainloop()
+
+    def set_stop_flag(self):
+        """ Set the stop flag to True and close the Tkinter window. """
+        print("\n[INFO] Stop button clicked. Terminating program.")
+        self.stop_flag = True
+        self.root.destroy()  # Close the Tkinter window
+
+    def check_for_stop(self):
+        """ Check if the program should stop and exit if necessary. """
+        if self.stop_flag:
+            print("Program terminated by researchers.")
+            self.say("I'm sorry, but unfortunately we're out of time, thanks a lot for participating and I hope to see you again!", check=False)
+            sys.exit()
 
     def init_music(self, file):
         mixer.init()
@@ -68,14 +96,16 @@ class NaoDanceTutor:
             mixer.music.set_volume(i / 100.0)
             t.sleep(fade_duration / 100.0) 
 
-    def get_speech_time(self, text, wpm=225):
+    def get_speech_time(self, text, wpm=215):
         """ Estimate speech time of text given specified words per minute. """
         nr_words = len(text.split())
         return nr_words/(wpm/60)
 
-    def say(self, message, wait=True):
+    def say(self, message, wait=True, check=True):
         """ Make Nao speak and sleep for estimated amount of speech time. """
         try:
+            if check:
+                self.check_for_stop()
             self.s.ALTextToSpeech.say(message)
             if wait:
                 if self.SPEAK:
@@ -176,20 +206,20 @@ class NaoDanceTutor:
 
             self.say(random.choice(self.speech_options.dance_together_intro))   
 
-            if self.INTERACTIVE:
-                ready = False
-                while ready is False:
-                    input = self.speechrec.whispermini()
-                    if input == '':  # stop everything if no audio detected
-                        self.find_movement()
+            # if self.INTERACTIVE:
+            #     ready = False
+            #     while ready is False:
+            #         input = self.speechrec.whispermini()
+            #         if input == '':  # stop everything if no audio detected
+            #             self.find_movement()
 
-                    print('input: ', input)
-                    if 'yes' in input.lower() or 'ready' in input.lower():
-                        ready = True
-                    if 'stop' in input.lower() or 'no' in input.lower():
-                        return
-            else:
-                t.sleep(2)  # if not interactive, just wait 2 seconds and then start
+            #         print('input: ', input)
+            #         if 'yes' in input.lower() or 'ready' in input.lower():
+            #             ready = True
+            #         if 'stop' in input.lower() or 'no' in input.lower():
+            #             return
+            # else:
+            t.sleep(2)  # if not interactive, just wait 2 seconds and then start
             self.say("One, two, three!")
 
             self.start_music()
@@ -216,7 +246,7 @@ class NaoDanceTutor:
                     self.perform_dance(dance)      # automatically waits
                     self.say(random.choice(self.speech_options.teach_resume))
             else:
-                t.sleep(10)      # TODO: change accordingly
+                t.sleep(10)      
                 self.pause_music()
                 if loop==0:
                     self.say("Wow that was great! Let's try one more time.")
@@ -247,20 +277,20 @@ class NaoDanceTutor:
     
     def dance_together(self):
         self.say(random.choice(self.speech_options.dance_together_intro))
-        if self.INTERACTIVE:
-            ready = False
-            while ready is False:
-                input = self.speechrec.whispermini()
-                if input == '':  # stop everything if no audio detected
-                    self.find_movement()
+        # if self.INTERACTIVE:
+        #     ready = False
+        #     while ready is False:
+        #         input = self.speechrec.whispermini()
+        #         if input == '':  # stop everything if no audio detected
+        #             self.find_movement()
 
-                print('input: ', input)
-                if 'yes' in input.lower() or 'ready' in input.lower():
-                    ready = True
-                if 'stop' in input.lower() or 'no' in input.lower():
-                    return
-        else:
-            t.sleep(2)
+        #         print('input: ', input)
+        #         if 'yes' in input.lower() or 'ready' in input.lower():
+        #             ready = True
+        #         if 'stop' in input.lower() or 'no' in input.lower():
+        #             return
+        # else:
+        t.sleep(2)
 
         self.say(random.choice(self.speech_options.dance_together_start))
 
@@ -283,7 +313,7 @@ class NaoDanceTutor:
     def introduction(self):
         """ Introduction of Nao. """
         input('Press key to start:)')
-        if self.pose_detector.detect_motion(incremental=10):
+        if self.pose_detector.detect_motion(incremental=3):
             self.say(random.choice(self.speech_options.welcome_message))
             
             if self.INTERACTIVE:
@@ -317,7 +347,7 @@ class NaoDanceTutor:
                 if 'learn' in input.lower() or 'teach' in input.lower() or 'another' in input.lower():
                     self.teach_move()
                     misunderstand=False
-                elif 'dance' in input.lower() or 'together' in input.lower() or 'freestyle' in input.lower():
+                elif 'dance' in input.lower() or 'together' in input.lower() or 'freestyle' in input.lower() or 'desicator' in input.lower():
                     self.dance_together()
                     misunderstand=False
                 elif 'stop' in input.lower() or 'quit' in input.lower():
@@ -337,20 +367,14 @@ class NaoDanceTutor:
             self.dance_together()
             self.say(random.choice(self.speech_options.end_message))
 
-
     def main(self):
+        # Start the GUI in a separate thread
+        gui_thread = threading.Thread(target=self.gui_stop, daemon=True)
+        gui_thread.start()
+
+        # Run main program
         self.introduction()
         self.scenario()
-
-        # self.init_music('sound/boogie_bot_shuffle.mp3')
-        # self.dance_together()
-
-        # print('dab')
-        # self.perform_dance('dab')
-        # print('airguitar')
-        # self.perform_dance('airguitar')
-        # print('sprinkler')
-        # self.perform_dance('sprinkler')
   
 if __name__ == "__main__":
     nao = NaoDanceTutor()
