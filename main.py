@@ -22,6 +22,7 @@ class NaoDanceTutor:
     """ Main Nao class, from here all other classes are instantiated. """
     THRESHOLD = 0.3 # placeholder
     DANCE_TIMES = {'dab':10, 'airguitar':16, 'sprinkler':17}  # TODO: MEASURE ON NAO AND CHANGE ACCORDINGLY
+<<<<<<< HEAD
         
     REF_FILES = [r"C:\Users\thoma\Documents\Studie\M1\HRI\ref_imgs\dab_ref.jpg", #dab
                  r"C:\Users\thoma\Documents\Studie\M1\HRI\ref_imgs\dab_ref.jpg", # air_guitar
@@ -140,7 +141,7 @@ class NaoDanceTutor:
             if input == '':
                 self.find_movement()
 
-            if 'dab' in input.lower() or 'deb' in input.lower() or 'dead' in input.lower() or 'dev' in input.lower():
+            if 'dab' in input.lower() or 'deb' in input.lower() or 'dead' in input.lower() or 'dev' in input.lower() or 'depth' in input.lower():
                 dance = 'dab'
                 valid_move = True
             if 'air' in input.lower() or 'guitar' in input.lower():
