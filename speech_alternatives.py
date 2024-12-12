@@ -104,16 +104,16 @@ class SpeechAlternatives:
                             "Here it is!"
                         ]
         self.dance_together_end = [
-                            "Wow, that was fun! I'm a bit tired now to be honest.",
-                            "That was awesome! I'm feeling a little tired now, to be honest.",
-                            "What a great time! I'm starting to feel a bit tired now.",
-                            "That was so much fun! I'm a little tired now, to be honest.",
-                            "Wow, that was amazing! I'm a bit worn out now, if I'm being honest.",
-                            "That was a blast! I'm starting to feel a little tired now.",
-                            "I had so much fun! I'm a bit tired now, though.",
-                            "What a great session! I'm feeling a little tired now, to be honest.",
-                            "That was really fun! I'm a bit exhausted now, to be honest.",
-                            "That was fantastic! I'm feeling a little tired now, to tell you the truth."
+                            "Wow, that was fun!",
+                            "That was awesome!",
+                            "What a great time!.",
+                            "That was so much fun!",
+                            "Wow, that was amazing!",
+                            "That was a blast!",
+                            "I had so much fun!",
+                            "What a great session!",
+                            "That was really fun!",
+                            "That was fantastic!"
                         ]
         self.desired_move = [
                             "Alright! Would you like to learn how to dab, a sprinkler or an air guitar?",

@@ -29,6 +29,13 @@ class NaoDanceTutor:
 
     SPEAK = True # for simulation
     INTERACTIVE = False
+=======
+    REF_FILES = [r"C:\Users\luukn\OneDrive\Afbeeldingen\dab_ref.jpg", #dab
+                 r"C:\Users\luukn\OneDrive\Afbeeldingen\guitar_ref_1.jpg", # air_guitar
+                 r"C:\Users\luukn\OneDrive\Afbeeldingen\sprinkler_ref_1.jpg"] # sprinkler
+    SPEAK = False # for simulation
+    INTERACTIVE = True
+>>>>>>> a52f11b229a0c58403c7a7991a5796b3975b3010
 
     def __init__(self):
         # Bridge
