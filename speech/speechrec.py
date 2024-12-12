@@ -1,5 +1,6 @@
 import time as t
 import speech_recognition as sr
+print("importing pipeline")
 from transformers import pipeline
 import librosa
 

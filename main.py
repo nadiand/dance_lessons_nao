@@ -3,6 +3,7 @@ import stk.events
 import stk.services
 import dance.dances as dances
 import speech.speechrec as speechrec
+print('importing human_pose_detection')
 import pose_detection.human_pose_detection as posedet
 import speech_alternatives as alter
 import time as t
@@ -21,9 +22,11 @@ class NaoDanceTutor:
     """ Main Nao class, from here all other classes are instantiated. """
     THRESHOLD = 0.3 # placeholder
     DANCE_TIMES = {'dab':10, 'airguitar':16, 'sprinkler':17}  # TODO: MEASURE ON NAO AND CHANGE ACCORDINGLY
-    REF_FILES = [r"C:\Users\luukn\OneDrive\Afbeeldingen\dab_ref.jpg", #dab
-                 r"C:\Users\luukn\OneDrive\Afbeeldingen\guitar_ref_1.jpg", # air_guitar
-                 r"C:\Users\luukn\OneDrive\Afbeeldingen\sprinkler_ref_1.jpg"] # sprinkler
+        
+    REF_FILES = [r"C:\Users\thoma\Documents\Studie\M1\HRI\ref_imgs\dab_ref.jpg", #dab
+                 r"C:\Users\thoma\Documents\Studie\M1\HRI\ref_imgs\dab_ref.jpg", # air_guitar
+                 r"C:\Users\thoma\Documents\Studie\M1\HRI\ref_imgs\dab_ref.jpg"] # sprinkler
+
     SPEAK = True # for simulation
     INTERACTIVE = False
 
@@ -41,9 +44,9 @@ class NaoDanceTutor:
                                                   ref_files=self.REF_FILES, 
                                                   nr_pics=3, verbose=False) 
         self.error_threshold = 50
-        self.engine = pyttsx3.init()
-        voices = self.engine.getProperty('voices')
-        self.engine.setProperty('voice', voices[1].id)
+        # self.engine = pyttsx3.init()
+        # voices = self.engine.getProperty('voices')
+        # self.engine.setProperty('voice', voices[1].id)
 
 
     def init_music(self, file):
