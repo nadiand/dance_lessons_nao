@@ -25,7 +25,7 @@ class NaoDanceTutor:
                  r"C:\Users\luukn\OneDrive\Afbeeldingen\guitar_ref_1.jpg", # air_guitar
                  r"C:\Users\luukn\OneDrive\Afbeeldingen\sprinkler_ref_1.jpg"] # sprinkler
     SPEAK = False # for simulation
-    INTERACTIVE = True
+    INTERACTIVE = False
 
     def __init__(self):
         # Bridge
@@ -68,7 +68,7 @@ class NaoDanceTutor:
             mixer.music.set_volume(i / 100.0)
             t.sleep(fade_duration / 100.0) 
 
-    def get_speech_time(self, text, wpm=170):
+    def get_speech_time(self, text, wpm=225):
         """ Estimate speech time of text given specified words per minute. """
         nr_words = len(text.split())
         return nr_words/(wpm/60)
@@ -130,7 +130,7 @@ class NaoDanceTutor:
             if input == '':
                 self.find_movement()
 
-            if 'dab' in input.lower() or 'deb' in input.lower() or 'dead' in input.lower() or 'dev' in input.lower() or 'depth' in input.lower():
+            if 'dab' in input.lower() or 'deb' in input.lower() or 'dead' in input.lower() or 'dev' in input.lower() or 'depth' in input.lower() or 'DAP' in input.lower() or 'death' in input.lower():
                 dance = 'dab'
                 valid_move = True
             if 'air' in input.lower() or 'guitar' in input.lower():
@@ -155,13 +155,13 @@ class NaoDanceTutor:
                     return True
         return False
 
-    def teach_move(self):
+    def teach_move(self, dance_interactive='dab'):
         """ Teach dance move in loop structure. """
         if self.INTERACTIVE:
             dance = self.get_desired_move()
             self.say(random.choice(self.speech_options.teach_intro(dance)))
         else:
-            dance = 'dab'
+            dance = dance_interactive
             self.say(random.choice(self.speech_options.teach_intro_non_interactive(dance)))
         self.perform_dance(dance)    # automatically waits for dance to finish, set wait=False to not wait
         self.say(random.choice(self.speech_options.teach_start))
@@ -184,7 +184,7 @@ class NaoDanceTutor:
                         self.find_movement()
 
                     print('input: ', input)
-                    if 'yes' in input.lower():
+                    if 'yes' in input.lower() or 'ready' in input.lower():
                         ready = True
                     if 'stop' in input.lower() or 'no' in input.lower():
                         return
@@ -255,7 +255,7 @@ class NaoDanceTutor:
                     self.find_movement()
 
                 print('input: ', input)
-                if 'yes' in input.lower():
+                if 'yes' in input.lower() or 'ready' in input.lower():
                     ready = True
                 if 'stop' in input.lower() or 'no' in input.lower():
                     return
@@ -282,7 +282,8 @@ class NaoDanceTutor:
     
     def introduction(self):
         """ Introduction of Nao. """
-        if self.pose_detector.detect_motion(incremental=30):
+        input('Press key to start:)')
+        if self.pose_detector.detect_motion(incremental=10):
             self.say(random.choice(self.speech_options.welcome_message))
             
             if self.INTERACTIVE:
@@ -297,7 +298,7 @@ class NaoDanceTutor:
 
                 self.say(random.choice(self.speech_options.greetings(name)))
                 self.say(random.choice(self.speech_options.intro_options))
-
+ 
     def scenario(self):
         """ Overall scenario loop. """
         self.init_music('sound/boogie_bot_shuffle.mp3')
@@ -313,7 +314,7 @@ class NaoDanceTutor:
                 if input == '': # stop everything if no audio detected
                     self.find_movement()
 
-                if 'learn' in input.lower() or 'teach' in input.lower():
+                if 'learn' in input.lower() or 'teach' in input.lower() or 'another' in input.lower():
                     self.teach_move()
                     misunderstand=False
                 elif 'dance' in input.lower() or 'together' in input.lower() or 'freestyle' in input.lower():
@@ -329,7 +330,9 @@ class NaoDanceTutor:
                 counter += 1    
         else:
             self.say("Let's start with teaching you a cool dancemove!")
-            self.teach_move()
+            self.teach_move(dance_interactive='dab')
+            self.teach_move(dance_interactive='airguitar')
+            self.teach_move(dance_interactive='sprinkler')
             self.say("Now let's just have some fun and dance together!")
             self.dance_together()
             self.say(random.choice(self.speech_options.end_message))

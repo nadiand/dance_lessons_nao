@@ -120,7 +120,7 @@ class SpeechAlternatives:
                             "Okay! Do you want to learn the dab, the sprinkler, or air guitar?",
                             "Great! Would you like to try the dab, the sprinkler, or air guitar?",
                             "Alright, which one would you like to learn: the dab, a sprinkler, or air guitar?",
-                            "Hey! Do you want to learn how to do the dab, a sprinkler, or air guitar?",
+                            "Alright! Do you want to learn how to do the dab, a sprinkler, or air guitar?",
                             "Ready? Would you like to learn the dab, a sprinkler, or air guitar?",
                             "Alright! What do you prefer to learn: the dab, sprinkler, or air guitar?",
                             "What would you like to learn today? The dab, a sprinkler, or air guitar?",
