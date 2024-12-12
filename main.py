@@ -24,8 +24,8 @@ class NaoDanceTutor:
     REF_FILES = [r"C:\Users\luukn\OneDrive\Afbeeldingen\dab_ref.jpg", #dab
                  r"C:\Users\luukn\OneDrive\Afbeeldingen\guitar_ref_1.jpg", # air_guitar
                  r"C:\Users\luukn\OneDrive\Afbeeldingen\sprinkler_ref_1.jpg"] # sprinkler
-    SPEAK = True # for simulation
-    INTERACTIVE = False
+    SPEAK = False # for simulation
+    INTERACTIVE = True
 
     def __init__(self):
         # Bridge
@@ -130,7 +130,7 @@ class NaoDanceTutor:
             if input == '':
                 self.find_movement()
 
-            if 'dab' in input.lower() or 'deb' in input.lower() or 'dead' in input.lower() or 'dev' in input.lower():
+            if 'dab' in input.lower() or 'deb' in input.lower() or 'dead' in input.lower() or 'dev' in input.lower() or 'depth' in input.lower():
                 dance = 'dab'
                 valid_move = True
             if 'air' in input.lower() or 'guitar' in input.lower():
