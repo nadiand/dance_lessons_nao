@@ -45,8 +45,6 @@ class NaoDanceTutor:
                                                   nr_pics=3, verbose=False) 
         self.error_threshold = 50
         self.engine = pyttsx3.init()
-        voices = self.engine.getProperty('voices')
-        self.engine.setProperty('voice', voices[1].id)
 
     def gui_stop(self):
         """ Tkinter GUI for stopping the program. """
@@ -269,10 +267,12 @@ class NaoDanceTutor:
         # Play music and dance
         dance_time = self.perform_dance(dance, wait=False, get_time=True, pause_music=False) # perform next code while dancing, and retrieve est time
         start_time = t.time()
+        found = False
         while t.time() - start_time < (dance_time):
             self.pose_detector.take_pics()
-            if self.good_move_found(dance) and self.INTERACTIVE:
+            if self.good_move_found(dance) and self.INTERACTIVE and not found:
                 self.say(random.choice(self.speech_options.dance_together_feedback(dance)))
+                found = True
 
     
     def dance_together(self):
