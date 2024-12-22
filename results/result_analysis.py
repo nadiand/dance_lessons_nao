@@ -3,15 +3,21 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
-def plot_results(data):
-    # TODO can easily extend this with the rest of the columns
-    values = [data['confidence'].tolist(), data['interesting'].tolist()]
+QUESTION_GROUPS = {'enjoyment': ['enjoy_dance_nao', 'learning_fun', 'dance_again', 'interesting'], \
+                    'competence': ['follow_instructions', 'confidence', 'improvement'], \
+                    'social': ['natural_moves', 'responsive', 'nao_understands', 'clear_instructions'], \
+                    'comfort': ['comfort', 'safety', 'predictable'], \
+                    'value': ['effort', 'nao_good_active', 'recommend']}
+
+
+def plot_results(data, group):
+    values = data[QUESTION_GROUPS[group]]
     plt.boxplot(values)
-    plt.xticks(ticks=[1,2],labels=['confidence', 'interesting'])
+    plt.xticks(ticks=np.arange(1,len(QUESTION_GROUPS[group])+1), labels=QUESTION_GROUPS[group])
     plt.show()
 
 
-def group_results(data, attribute):
+def group_results(data, attribute, group):
     group_data, group_labels = [], []
     for val in data[attribute].unique():
         group_labels.append(val)
@@ -19,10 +25,9 @@ def group_results(data, attribute):
 
     fig, axs = plt.subplots(1, len(group_labels), figsize=(30, 10))
     for i, age_group in enumerate(group_data):
-    # TODO can easily extend this with the rest of the columns
-        values = [age_group['confidence'].tolist(), age_group['interesting'].tolist()]
+        values = age_group[QUESTION_GROUPS[group]]
         axs[i].boxplot(values)
-        axs[i].set_xticks(ticks=[1,2],labels=['confidence', 'interesting'])
+        axs[i].set_xticks(ticks=np.arange(1,len(QUESTION_GROUPS[group])+1), labels=QUESTION_GROUPS[group])
         axs[i].set_title(group_labels[i])
     
     plt.show()
@@ -40,9 +45,11 @@ if __name__ == "__main__":
     data = raw_data.rename(columns=short_col_names)
 
     # full results
-    # plot_results(data)
+    plot_results(data, 'enjoyment')
+    plot_results(data[data['pid'] > 10], 'enjoyment')  # results of participants watching video
+    plot_results(data[data['pid'] <= 10], 'enjoyment') # results of participants interacting with robot
 
     # results split on the three personal attributes
-    # group_results(data, 'age')
-    # group_results(data, 'dancing')
-    group_results(data, 'activity_level')
+    group_results(data, 'age', 'enjoyment')
+    group_results(data, 'dancing', 'enjoyment')
+    group_results(data, 'activity_level', 'enjoyment')
