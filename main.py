@@ -26,7 +26,7 @@ class NaoDanceTutor:
     REF_FILES = [r"C:\Users\luukn\OneDrive\Afbeeldingen\dab_ref.jpg", #dab
                  r"C:\Users\luukn\OneDrive\Afbeeldingen\guitar_ref_1.jpg", # air_guitar
                  r"C:\Users\luukn\OneDrive\Afbeeldingen\sprinkler_ref_1.jpg"] # sprinkler
-    SPEAK = True # for simulation
+    SPEAK = False # for simulation
     INTERACTIVE = True
     STOP_FLAG = False
 
@@ -94,7 +94,7 @@ class NaoDanceTutor:
             mixer.music.set_volume(i / 100.0)
             t.sleep(fade_duration / 100.0) 
 
-    def get_speech_time(self, text, wpm=215):
+    def get_speech_time(self, text, wpm=210):
         """ Estimate speech time of text given specified words per minute. """
         nr_words = len(text.split())
         return nr_words/(wpm/60)
@@ -130,9 +130,9 @@ class NaoDanceTutor:
 
     def find_movement(self):
         """ Check if participant still there. """
-        if not self.pose_detector.detect_motion(threshold=100, detection_time=5, incremental=False):
+        if not self.pose_detector.detect_motion(threshold=50, detection_time=5, incremental=False):
             self.say(random.choice(self.speech_options.left_message))
-            if self.pose_detector.detect_motion(detection_time=10):
+            if self.pose_detector.detect_motion(threshold=50, detection_time=10):
                 self.say(random.choice(self.speech_options.welcome_back))
             else:
                 self.init_music("sound/EverybodyHurts.mp3")
@@ -158,13 +158,13 @@ class NaoDanceTutor:
             if input == '':
                 self.find_movement()
 
-            if 'dab' in input.lower() or 'deb' in input.lower() or 'dead' in input.lower() or 'dev' in input.lower() or 'depth' in input.lower() or 'DAP' in input.lower() or 'death' in input.lower():
+            if 'dab' in input.lower() or 'deb' in input.lower() or 'dead' in input.lower() or 'dev' in input.lower() or 'depth' in input.lower() or 'DAP' in input.lower() or 'death' in input.lower()  or 'that' in input.lower() or 'dub' in input.lower() or 'adopt' in input.lower() or 'deaf' in input.lower() or 'dad' in input.lower():
                 dance = 'dab'
                 valid_move = True
-            if 'air' in input.lower() or 'guitar' in input.lower():
+            if 'air' in input.lower() or 'guitar' in input.lower() or 'ergator' in input.lower() or 'eric' in input.lower():
                 dance = 'airguitar'
                 valid_move = True
-            if 'sprinkler' in input.lower() or 'sprinter' in input.lower() or 'spring' in input.lower():
+            if 'sprinkler' in input.lower() or 'sprinter' in input.lower() or 'spring' in input.lower() or 'printler' in input.lower():
                 dance = 'sprinkler'
                 valid_move = True
 
@@ -179,7 +179,7 @@ class NaoDanceTutor:
                 input = self.speechrec.whispermini()
                 if input == '':
                     self.find_movement()
-                if 'something' in input.lower() or 'else' in input.lower() or 'stop' in input.lower() or 'quit' in input.lower():
+                if 'something' in input.lower() or 'else' in input.lower() or 'stop' in input.lower() or 'quit' in input.lower() or 'change' in input.lower():
                     return True
         return False
 
@@ -313,7 +313,7 @@ class NaoDanceTutor:
     def introduction(self):
         """ Introduction of Nao. """
         input('Press key to start:)')
-        if self.pose_detector.detect_motion(incremental=3):
+        if self.pose_detector.detect_motion(incremental=1):
             self.say(random.choice(self.speech_options.welcome_message))
             
             if self.INTERACTIVE:
@@ -347,10 +347,10 @@ class NaoDanceTutor:
                 if 'learn' in input.lower() or 'teach' in input.lower() or 'another' in input.lower():
                     self.teach_move()
                     misunderstand=False
-                elif 'dance' in input.lower() or 'together' in input.lower() or 'freestyle' in input.lower() or 'desicator' in input.lower():
+                elif 'dance' in input.lower() or 'together' in input.lower() or 'freestyle' in input.lower() or 'desicator' in input.lower() or 'enjoy' in input.lower() or 'dancing' in input.lower() or 'dense' in input.lower():
                     self.dance_together()
                     misunderstand=False
-                elif 'stop' in input.lower() or 'quit' in input.lower():
+                elif 'stop' in input.lower() or 'quit' in input.lower() or 'done' in input.lower():
                     self.say(random.choice(self.speech_options.end_message))
                     stop = True
                 else:

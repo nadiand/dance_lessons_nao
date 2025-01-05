@@ -6,7 +6,7 @@ class SpeechAlternatives:
                             "Hey! Welcome!",
                             "Hi! Welcome to the fun!",
                             "Hello there! Welcome!",
-                            "Hey there! Welcome aboard!",
+                            # "Hey there! Welcome aboard!",
                             "Hi! Great to see you!",
                             "Hi! So happy you're here!",
                             "Hey! Welcome to the party!"
@@ -68,17 +68,11 @@ class SpeechAlternatives:
                             "I had a lot of fun, thanks for joining! I look forward to seeing you again!"
                         ]
         self.scenario_misunderstood = [
-                            "I'm sorry, I didn't understand that. Could you please say again if you would like to dance together or learn a move?",
-                            "Sorry, I didn't quite catch that. Could you repeat if you want to dance together or learn a move?",
-                            "Apologies, I didn't understand. Could you please tell me again if you'd like to dance together or learn a move?",
-                            "I'm sorry, I didn't quite get that. Can you repeat whether you want to dance together or learn a move?",
-                            "Sorry, I didn't understand. Could you say again if you'd prefer to dance together or learn a move?",
-                            "Sorry, I didn't catch that. Could you please clarify if you want to dance together or learn a move?",
-                            "I'm sorry, I missed that. Can you repeat whether you want to learn a move or dance together?",
-                            "I didn't quite understand. Could you please say again if you'd like to learn a move or dance together?",
-                            "Apologies, I didn't quite hear that. Can you clarify if you want to dance together or learn a move?",
-                            "Sorry, I didn't get that. Can you please repeat if you'd like to learn a move or dance together?"
-                        ]
+                            "I'm sorry, I didn't understand that. Could you please say again if you would like to dance together, learn a move, or stop?",
+                            "Sorry, I didn't quite catch that. Could you repeat if you want to dance together, learn a move, or stop?",
+                            "Apologies, I didn't understand. Could you please tell me again if you'd like to dance together, learn a move, or stop?",
+                            "I'm sorry, I didn't quite get that. Can you repeat whether you want to dance together, learn a move, or stop?",
+                            "Sorry, I didn't understand. Could you say again if you'd prefer to dance together or learn a move or stop?"                        ]
         self.dance_together_intro = [
                             "Alrighty! Are you ready?",
                             "Okay! Are you all set?",
@@ -116,28 +110,28 @@ class SpeechAlternatives:
                             "That was fantastic!"
                         ]
         self.desired_move = [
-                            "Alright! Would you like to learn how to dab, a sprinkler or an air guitar?",
-                            "Okay! Do you want to learn the dab, the sprinkler, or air guitar?",
-                            "Great! Would you like to try the dab, the sprinkler, or air guitar?",
-                            "Alright, which one would you like to learn: the dab, a sprinkler, or air guitar?",
-                            "Alright! Do you want to learn how to do the dab, a sprinkler, or air guitar?",
-                            "Ready? Would you like to learn the dab, a sprinkler, or air guitar?",
-                            "Alright! What do you prefer to learn: the dab, sprinkler, or air guitar?",
-                            "What would you like to learn today? The dab, a sprinkler, or air guitar?",
-                            "Okay, let's get started! Do you want to learn the dab, the sprinkler, or air guitar?",
-                            "What do you want to learn: the dab, a sprinkler, or air guitar?"
+                            "Alright! Would you like to learn how to dab, a sprinkler or an airguitar?",
+                            "Okay! Do you want to learn the dab, the sprinkler, or airguitar?",
+                            "Great! Would you like to try the dab, the sprinkler, or airguitar?",
+                            "Alright, which one would you like to learn: the dab, a sprinkler, or airguitar?",
+                            "Alright! Do you want to learn how to do the dab, a sprinkler, or airguitar?",
+                            "Ready? Would you like to learn the dab, a sprinkler, or airguitar?",
+                            "Alright! What do you prefer to learn: the dab, sprinkler, or airguitar?",
+                            "What would you like to learn today? The dab, a sprinkler, or airguitar?",
+                            "Okay, let's get started! Do you want to learn the dab, the sprinkler, or airguitar?",
+                            "What do you want to learn: the dab, a sprinkler, or airguitar?"
                         ]
         self.desired_move_misunderstand = [
-                            "Sorry, I didn't understand. Would you like to learn how to dab, a sprinkler or an air guitar?",
-                            "Apologies, I didn't quite catch that. Would you like to learn the dab, a sprinkler, or air guitar?",
-                            "Sorry, I missed that. Would you like to learn how to do the dab, the sprinkler, or air guitar?",
-                            "I'm sorry, I didn't understand. Would you prefer to learn the dab, a sprinkler, or air guitar?",
-                            "Sorry, I didn't get that. Would you like to try the dab, a sprinkler, or air guitar?",
-                            "I didn't quite understand. Would you like to learn the dab, a sprinkler, or air guitar?",
-                            "Sorry, I didn't catch that. Would you like to try the dab, a sprinkler, or air guitar?",
-                            "Apologies, I didn't quite hear that. Would you like to learn the dab, sprinkler, or air guitar?",
-                            "I'm sorry, I didn't understand. Can you clarify if you'd like to learn the dab, a sprinkler, or air guitar?",
-                            "Sorry, I didn't get that. Would you like to learn the dab, a sprinkler, or air guitar instead?"
+                            "Sorry, I didn't understand. Would you like to learn how to dab, a sprinkler or an airguitar?",
+                            "Apologies, I didn't quite catch that. Would you like to learn the dab, a sprinkler, or airguitar?",
+                            "Sorry, I missed that. Would you like to learn how to do the dab, the sprinkler, or airguitar?",
+                            "I'm sorry, I didn't understand. Would you prefer to learn the dab, a sprinkler, or airguitar?",
+                            "Sorry, I didn't get that. Would you like to try the dab, a sprinkler, or airguitar?",
+                            "I didn't quite understand. Would you like to learn the dab, a sprinkler, or airguitar?",
+                            "Sorry, I didn't catch that. Would you like to try the dab, a sprinkler, or airguitar?",
+                            "Apologies, I didn't quite hear that. Would you like to learn the dab, sprinkler, or airguitar?",
+                            "I'm sorry, I didn't understand. Can you clarify if you'd like to learn the dab, a sprinkler, or airguitar?",
+                            "Sorry, I didn't get that. Would you like to learn the dab, a sprinkler, or airguitar instead?"
                         ]
         self.desired_move_other = [
                             "I'm sorry, I'm not yet able to do other dancemoves. Please select one of the three that I do know.",
