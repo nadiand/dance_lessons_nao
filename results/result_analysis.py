@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 
+ALL_QUESTIONS = ['enjoy_dance_nao', 'learning_fun', 'dance_again', 'interesting', 'follow_instructions', 'confidence', 'improvement', 'natural_moves', 'responsive', 'nao_understands', 'clear_instructions', 'comfort', 'safety', 'predictable', 'effort', 'nao_good_active', 'recommend']
 QUESTION_GROUPS = {'enjoyment': ['enjoy_dance_nao', 'learning_fun', 'dance_again', 'interesting'], \
                     'competence': ['follow_instructions', 'confidence', 'improvement'], \
                     'social': ['natural_moves', 'responsive', 'nao_understands', 'clear_instructions'], \
@@ -10,26 +11,33 @@ QUESTION_GROUPS = {'enjoyment': ['enjoy_dance_nao', 'learning_fun', 'dance_again
                     'value': ['effort', 'nao_good_active', 'recommend']}
 
 
-def plot_results(data, group):
-    values = data[QUESTION_GROUPS[group]]
-    plt.boxplot(values)
-    plt.xticks(ticks=np.arange(1,len(QUESTION_GROUPS[group])+1), labels=QUESTION_GROUPS[group])
+def plot_results(data, group=None):
+    if group is not None:
+        values = [QUESTION_GROUPS[group]]
+    else:
+        values = data[ALL_QUESTIONS]
+    fig, axs = plt.subplots(2, 1, sharey=True, figsize=(20, 5))
+    axs[0].boxplot(values[data['pid'] < 11])
+    axs[0].set_title('Questionnaire results for interactive setting')
+    axs[1].boxplot(values[data['pid'] > 10])
+    axs[1].set_title('Questionnaire results for non-interactive setting')
+    plt.subplots_adjust(hspace=0.3)
     plt.show()
 
 
-def group_results(data, attribute, group):
+def group_results(data, attribute, group=None):
     group_data, group_labels = [], []
     for val in data[attribute].unique():
         group_labels.append(val)
         group_data.append(data[data[attribute] == val])
 
-    fig, axs = plt.subplots(1, len(group_labels), figsize=(30, 10))
+    fig, axs = plt.subplots(len(group_labels), 1, sharex=True, figsize=(30, 10))
     for i, age_group in enumerate(group_data):
-        values = age_group[QUESTION_GROUPS[group]]
+        values = age_group[ALL_QUESTIONS] #QUESTION_GROUPS[group]]
         axs[i].boxplot(values)
-        axs[i].set_xticks(ticks=np.arange(1,len(QUESTION_GROUPS[group])+1), labels=QUESTION_GROUPS[group])
         axs[i].set_title(group_labels[i])
     
+    plt.subplots_adjust(hspace=0.3)
     plt.show()
 
 
@@ -45,11 +53,9 @@ if __name__ == "__main__":
     data = raw_data.rename(columns=short_col_names)
 
     # full results
-    plot_results(data, 'enjoyment')
-    plot_results(data[data['pid'] > 10], 'enjoyment')  # results of participants watching video
-    plot_results(data[data['pid'] <= 10], 'enjoyment') # results of participants interacting with robot
+    plot_results(data)
 
-    # results split on the three personal attributes
-    group_results(data, 'age', 'enjoyment')
-    group_results(data, 'dancing', 'enjoyment')
-    group_results(data, 'activity_level', 'enjoyment')
+    # # results split on the three personal attributes
+    group_results(data, 'age')
+    group_results(data, 'dancing')
+    group_results(data, 'activity_level')
