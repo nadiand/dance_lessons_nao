@@ -44,6 +44,7 @@ def group_results(data, attribute, group=None):
         values = age_group[ALL_QUESTIONS] #QUESTION_GROUPS[group]]
         axs[i].boxplot(values)
         axs[i].set_title(group_labels[i])
+        axs[i].set_ylabel("Score")
     
     plt.subplots_adjust(hspace=0.3)
     plt.show()
@@ -114,7 +115,7 @@ if __name__ == "__main__":
     plot_results(data)
 
     # # results split on the three personal attributes
-    # group_results(data, 'age')
-    # group_results(data, 'dancing')
-    # group_results(data, 'activity_level')
-    correlation_heatmap(data)
+    group_results(data, 'age')
+    group_results(data, 'dancing')
+    group_results(data, 'activity_level')
+    # correlation_heatmap(data)
