@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd 
 import matplotlib.pyplot as plt
 import seaborn as sns
+from scipy.stats import mannwhitneyu as whitney_houston
+from scipy.stats import kruskal
 
 ALL_QUESTIONS = ['enjoy_dance_nao', 'learning_fun', 'dance_again', 'interesting', 'follow_instructions', 'confidence', 'improvement', 'natural_moves', 'responsive', 'nao_understands', 'clear_instructions', 'comfort', 'safety', 'predictable', 'effort', 'nao_good_active', 'recommend']
 QUESTION_GROUPS = {'enjoyment': ['enjoy_dance_nao', 'learning_fun', 'dance_again', 'interesting'], \
@@ -72,9 +74,9 @@ def correlation_heatmap(data):
     # Apply mappings to create numerical columns
     data['activity_level'] = data['activity_level'].map(physical_activity_mapping)
     data['dancing'] = data['dancing'].map(dance_activity_mapping)
-    print(data['age'])
+    #print(data['age'])
     data['age'] = data['age'].map(age_mapping)
-    print(data['age'])
+    #print(data['age'])
 
     # Ensure all columns are numeric for correlation
     correlations = data[['activity_level', 'dancing', 'age'] + ALL_QUESTIONS].corr()
@@ -92,6 +94,80 @@ def correlation_heatmap(data):
     plt.tight_layout()
     plt.show()
 
+def stat_test_condition(data):
+    values = data[ALL_QUESTIONS]
+    robot_cond = values[data['pid'] < 11]
+    video_cond = values[data['pid'] > 10]
+    # print('robot:', robot_cond)
+    # print('video:', video_cond)
+    stats = []
+    p_vals = []
+    for question in ALL_QUESTIONS:
+        #print('QUESTION:', question)
+        robot_scores = robot_cond[question].to_list()
+        video_scores = video_cond[question].to_list()
+        
+        stat, p_val = whitney_houston(robot_scores, video_scores)
+        stats.append(stat)
+        p_vals.append(p_val)
+
+    #print(p_vals)
+
+    return p_vals, stats
+
+def stat_test_activity_level(data):
+    values = data[ALL_QUESTIONS]
+    group_never = values[data['activity_level'] == 'Never']
+    group_once = values[data['activity_level'] == 'Once a week']
+    group_23week = values[data['activity_level'] == '2-3 times a week']
+    group_4 = values[data['activity_level'] == '4+ times a week']
+
+    stats = []
+    p_vals = []
+    for question in ALL_QUESTIONS:
+        #print('QUESTION:', question)
+        never_scores = group_never[question].to_list()
+        once_scores = group_once[question].to_list()
+        x23week_scores = group_23week[question].to_list()
+        x4_scores = group_4[question].to_list()
+        
+        stat, p_val = kruskal(never_scores, once_scores, x23week_scores, x4_scores)
+        stats.append(stat)
+        p_vals.append(p_val)
+
+        #print('pval:', p_val)
+        # print('--------------------------------')
+
+    #print(p_vals)
+
+    return p_vals, stats
+
+    
+def stat_test_dancing(data):
+    values = data[ALL_QUESTIONS]
+    group_never = values[data['dancing'] == 'I never dance']
+    group_rarely = values[data['dancing'] == 'I dance only rarely (at events, parties, etc)']
+    group_often = values[data['dancing'] == 'I dance often (at least once a week)']
+
+    stats = []
+    p_vals = []
+    for question in ALL_QUESTIONS:
+        #print('QUESTION:', question)
+        never_scores = group_never[question].to_list()
+        rarely_scores = group_rarely[question].to_list()
+        often_scores = group_often[question].to_list()
+        
+        stat, p_val = kruskal(never_scores, rarely_scores, often_scores)
+        stats.append(stat)
+        p_vals.append(p_val)
+
+        #print('pval:', p_val)
+        # print('--------------------------------')
+
+    #print(p_vals)
+
+    return p_vals, stats
+
 
 
 
@@ -104,18 +180,33 @@ if __name__ == "__main__":
                         'NAO was responsive to my actions': 'responsive', 'I felt NAO understood how well I was doing': 'nao_understands', "NAO's instructions were clear and helpful": 'clear_instructions', \
                         'I felt comfortable dancing with NAO': 'comfort', 'I felt safe while interacting with NAO': 'safety', "NAO's movements were predictable": 'predictable',\
                         'I put effort into learning the dances': 'effort', 'I think dancing with NAO is a good way to be more active': 'nao_good_active', 'I would recommend dancing with NAO to others': 'recommend'}
-    raw_data = pd.read_csv('participant_data.csv')
+    raw_data = pd.read_csv("C:/Users/luukn/OneDrive/Documenten/RadboudUniversity/Master/Year1/Q1/HRI/robot-jumpstarter-python3-master/robot-jumpstarter-python3-master/python3/results/participant_data.csv")
     data = raw_data.rename(columns=short_col_names)
 
     # Apply reverse scoring for questions
     for question in ALL_QUESTIONS:
         data[question] = data[question].apply(lambda x: 8 - x if not pd.isna(x) else x)
 
+    # Significance testing
+    pvals_cond, stats_cond = stat_test_condition(data)
+    pvals_activity, stats_activity = stat_test_activity_level(data)
+    pvals_dancing, stats_dancing = stat_test_dancing(data)
+
+    print('pvals based on condition: ', pvals_cond, '\n')
+    print('pvals based on activity level: ', pvals_activity, '\n')
+    print('pvals based on dancing frequency: ', pvals_dancing, '\n')
+
     # full results
     plot_results(data)
 
-    # # results split on the three personal attributes
+    # # # results split on the three personal attributes
     group_results(data, 'age')
     group_results(data, 'dancing')
     group_results(data, 'activity_level')
-    # correlation_heatmap(data)
+    correlation_heatmap(data)
+
+
+
+
+
+
