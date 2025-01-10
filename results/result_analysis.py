@@ -10,17 +10,25 @@ QUESTION_GROUPS = {'enjoyment': ['enjoy_dance_nao', 'learning_fun', 'dance_again
                     'comfort': ['comfort', 'safety', 'predictable'], \
                     'value': ['effort', 'nao_good_active', 'recommend']}
 
-
 def plot_results(data, group=None):
     if group is not None:
         values = [QUESTION_GROUPS[group]]
     else:
         values = data[ALL_QUESTIONS]
-    fig, axs = plt.subplots(2, 1, sharey=True, figsize=(20, 5))
+
+    fig, axs = plt.subplots(2, 1, sharey=True, sharex=True, figsize=(20, 5))
+
     axs[0].boxplot(values[data['pid'] < 11])
     axs[0].set_title('Questionnaire results for interactive setting')
+    axs[0].set_ylabel("Score")  # Y-label for the first subplot
+
     axs[1].boxplot(values[data['pid'] > 10])
     axs[1].set_title('Questionnaire results for non-interactive setting')
+    axs[1].set_ylabel("Score")  # Y-label for the second subplot
+
+    # Set a single x-label for both subplots
+    axs[1].set_xlabel("Question number")
+
     plt.subplots_adjust(hspace=0.3)
     plt.show()
 
@@ -53,26 +61,36 @@ def correlation_heatmap(data):
         "I dance only rarely (at events, parties, etc)": 1,
         "I dance often (at least once a week)": 2
     }
+    age_mapping = {
+        '18-20': 0,
+        '21-24': 1,
+        '25-29': 2,
+        '30+': 3
+    }
 
     # Apply mappings to create numerical columns
     data['activity_level'] = data['activity_level'].map(physical_activity_mapping)
     data['dancing'] = data['dancing'].map(dance_activity_mapping)
+    print(data['age'])
+    data['age'] = data['age'].map(age_mapping)
+    print(data['age'])
 
-    # Calculate correlations
-    correlations = data[['activity_level', 'dancing'] + ALL_QUESTIONS].corr()
+    # Ensure all columns are numeric for correlation
+    correlations = data[['activity_level', 'dancing', 'age'] + ALL_QUESTIONS].corr()
 
-    # Extract correlations of physical and dance activity with questionnaire responses
-    activity_corr = correlations.loc[['activity_level', 'dancing'], ALL_QUESTIONS].T  # Transpose for switching axes
+    # Extract correlations of attributes with questionnaire responses
+    activity_corr = correlations.loc[['activity_level', 'dancing', 'age'], ALL_QUESTIONS].T
 
     # Plot the heatmap
-    plt.figure(figsize=(8, 12))
+    plt.figure(figsize=(10, 12))
     sns.heatmap(activity_corr, annot=True, cmap="coolwarm", cbar=True)
-    plt.title("Correlation of Questionnaire Responses with Physical and Dance Activity")
-    plt.xlabel("Activity Type")
+    plt.title("Correlation of Questionnaire Responses with Age, Physical, and Dance Activity")
+    plt.xlabel("Attributes (Activity and Age)")
     plt.ylabel("Questions")
     plt.yticks(rotation=0)
     plt.tight_layout()
     plt.show()
+
 
 
 
