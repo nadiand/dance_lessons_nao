@@ -22,28 +22,32 @@ This repository contains code and resources for the Dance Lessons with Nao proje
 
 ## Installation
 
-# Clone the repository:
+1. Clone the repository:
 
-git clone https://github.com/nadiand/dance_lessons_nao.git
+ ```sh
+ git clone https://github.com/nadiand/dance_lessons_nao.git
+ ```
 
-# Navigate to the project directory:
+2.  Navigate to the project directory:
+```sh
+  cd dance_lessons_nao
+```
 
-cd dance_lessons_nao
-
-Ensure you have the NAOqi SDK installed and accessible in your Python 2.7 environment.
+3. Ensure you have the NAOqi SDK installed and accessible in your Python 2.7 environment.
 
 ## Usage
 
 1. Turn on the NAO robot and connect it to your network.
 
 2. Run the main script to start a dance lesson:
-
-```python main.py```
+```sh
+python main.py
+```
 
 
 ## Contributors
 
-* Nadezhda Dobreva, Maikel Jans, Luuk Neervens, Willem Blokland, Thomas Helsen
+*  Willem Blokland, Nadezhda Dobreva, Thomas Helsen, Maikel Jans, and Luuk Neervens.
 ## License
 
 This project is licensed under the CC BY-NC 4.0 License. See the ```LICENSE``` file for details.
